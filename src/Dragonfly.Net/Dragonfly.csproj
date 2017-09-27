@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>Heather Floyd [www.HeatherFloyd.com]</Copyright>
+    <RepositoryType>GIT</RepositoryType>
+    <Authors>Heather Floyd</Authors>
+    <Company>Dragonfly.Net</Company>
+    <Product>Dragonfly.Net</Product>
+    <Description>A collection of .Net Helpers &amp; Models</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.4.9.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+</Project>
