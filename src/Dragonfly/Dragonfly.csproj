@@ -2,13 +2,17 @@
   <PropertyGroup>
     <TargetFramework>net45</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Copyright>Heather Floyd [www.HeatherFloyd.com]</Copyright>
     <RepositoryType>GIT</RepositoryType>
     <Authors>Heather Floyd</Authors>
-    <Company>Dragonfly.Net</Company>
-    <Product>Dragonfly.Net</Product>
+    <Company></Company>
+    <Product>Dragonfly</Product>
     <Description>A collection of .Net Helpers &amp; Models</Description>
+    <PackageLicenseUrl>https://github.com/hfloyd/Dragonfly.Net/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/hfloyd/Dragonfly.Net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
+    <PackageId>Dragonfly.Net</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.4.9.5" />
@@ -19,4 +23,6 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
+
+  <Import Project="..\Custom.targets" />
 </Project>
