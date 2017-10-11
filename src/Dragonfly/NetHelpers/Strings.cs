@@ -13,8 +13,6 @@
     [Serializable]
     public static class Strings
     {
-
-
         //TODO: Convert to use param list for unlimited testing values, like string.concat()
         public static string NoEmptyString(string FirstPreferredString, string SecondString, string ThirdString = "")
         {
@@ -663,6 +661,24 @@
             MyString = MyString.Replace(String.Concat(Separator, Separator), "");
 
             return MyString;
+        }
+
+        public static string SplitByTokenIfItExists(string Name, string Token)
+        {
+            if (Name.IndexOf(Token) > -1)
+            {
+                return Name.Substring(0, Name.IndexOf(Token));
+            }
+            return Name;
+        }
+        
+        public static string StripNumbers(string TextWithNumbers)
+        {
+            var stripped = TextWithNumbers;
+
+            stripped = new String(TextWithNumbers.Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
+
+            return stripped;
         }
 
     }
