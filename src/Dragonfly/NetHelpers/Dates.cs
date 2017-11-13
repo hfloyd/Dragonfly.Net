@@ -1,6 +1,8 @@
 ﻿namespace Dragonfly.NetHelpers
 {
     using System;
+    using System.Net.Configuration;
+    using System.Text;
 
     public static class Dates
     {
@@ -12,6 +14,14 @@
             YYYYMMDD
         }
 
+        /// <summary>
+        /// Given an integer representing the month, will return a formatted version
+        /// Ex: FormatMonthNumber(12, "MMM") = "Dec"
+        /// NOTE: First day of month and current year are assumed for formatting purposes.
+        /// </summary>
+        /// <param name="MonthNumber">Number of the month to format</param>
+        /// <param name="Format">Format string (ex: MM, MMM, MMMM)</param>
+        /// <returns></returns>
         public static string FormatMonthNumber(int MonthNumber, string Format)
         {
             var tempDate = Convert.ToDateTime(String.Concat(MonthNumber, "/1/", DateTime.Now.Year.ToString()));
@@ -61,11 +71,22 @@
             return ReturnString;
         }
 
-        public static string FormatDateRange(DateTime StartDate, DateTime EndDate, string FullDateFormat, string MonthDateFormat, string DayDateFormat, string PreferredFormat, string RangeDelim = " - ")
+        /// <summary>
+        /// Formats a range using two dates.
+        /// </summary>
+        /// <param name="StartDate"></param>
+        /// <param name="EndDate"></param>
+        /// <param name="FullDateFormat">Format string for full date (including year) (ex: 'MMM, d, yyyy')</param>
+        /// <param name="MonthDateFormat">Format string to use when the months are different (ex: 'MM d', 'MMM d', 'MMMM dd')</param>
+        /// <param name="DayDateFormat">Format string to use when the days are different (ex: 'd, yy', 'd, yyyy')</param>
+        /// <param name="PreferredFormat">Preferred format for single-day (Options: 'y', 'm', or 'd')</param>
+        /// <param name="RangeDelim">Separator to use for range </param>
+         /// <returns></returns>
+        public static string FormatDateRange(DateTime StartDate, DateTime EndDate, string FullDateFormat, string MonthDateFormat, string DayDateFormat, string PreferredFormat, string RangeDelim)
         {
             var finalDates = "";
 
-            if (StartDate.Date == EndDate.Date)
+            if (StartDate.Date == EndDate.Date || EndDate== DateTime.MinValue)
             {
                 //Dates are the same, return only 1
                 switch (PreferredFormat)
@@ -105,6 +126,10 @@
                         //Different months
                         var date1 = StartDate.ToString(MonthDateFormat);
                         var date2 = EndDate.ToString(MonthDateFormat);
+                        if (PreferredFormat == "y")
+                        {
+                            date2 = EndDate.ToString(FullDateFormat);
+                        }
                         finalDates = string.Format("{0}{1}{2}", date1, RangeDelim, date2);
                     }
                     else
@@ -123,6 +148,83 @@
             }
             return finalDates;
         }
+
+        /// <summary>
+        /// Formats a range using two dates.
+        /// </summary>
+        /// <param name="StartDate"></param>
+        /// <param name="EndDate"></param>
+        /// <param name="FullDateFormat">Format string for full date (ex: 'MMM, d, yyyy')</param>
+        /// <param name="MonthDateFormat">Format string to use when the months are different (ex: 'MM d', 'MMM d', 'MMMM dd')</param>
+        /// <param name="DayDateFormat">Format string to use when the days are different (ex: 'd, yy', 'd, yyyy')</param>
+        /// <param name="PreferredFormat">Preferred format for single-day events (Options: 'y', 'm', or 'd')</param>
+        /// <param name="RangeDelim">Separator to use for range (Default = " - ")</param>
+        /// <param name="TestMode">When set to TRUE will display a variety of test start & end dates so you can see all possible formats using your formatting params.</param>
+        /// <returns></returns>
+        public static string FormatDateRange(DateTime StartDate, DateTime EndDate, string FullDateFormat,
+            string MonthDateFormat, string DayDateFormat, string PreferredFormat, string RangeDelim,
+            bool TestMode = false)
+        {
+            if (TestMode == true)
+            {
+                var finalOutput = new StringBuilder();
+                DateTime start ;
+                DateTime end;
+
+                //Single Day
+                start = new DateTime(DateTime.Now.Year, 3, 8);
+                end = new DateTime(DateTime.Now.Year, 3, 8);
+                finalOutput.AppendLine("Same Day ... ");
+                finalOutput.AppendLine("Start: " + start.ToString("d") + " End: " + end.ToString("d") + " = ");
+                finalOutput.AppendLine(FormatDateRange(start, end, FullDateFormat, MonthDateFormat, DayDateFormat,
+                    PreferredFormat, RangeDelim));
+                finalOutput.AppendLine(" | ");
+
+                //Single Month
+                start = new DateTime(DateTime.Now.Year, 6, 10);
+                end = new DateTime(DateTime.Now.Year, 6, 16);
+                finalOutput.AppendLine("Same Month ... ");
+                finalOutput.AppendLine("Start: " + start.ToString("d") + " End: " + end.ToString("d") + " = ");
+                finalOutput.AppendLine(FormatDateRange(start, end, FullDateFormat, MonthDateFormat, DayDateFormat,
+                    PreferredFormat, RangeDelim));
+                finalOutput.AppendLine(" | ");
+
+                //Single Year
+                start = new DateTime(DateTime.Now.Year, 9, 27);
+                end = new DateTime(DateTime.Now.Year, 10, 6);
+                finalOutput.AppendLine("Same Year ... ");
+                finalOutput.AppendLine("Start: " + start.ToString("d") + " End: " + end.ToString("d") + " = ");
+                finalOutput.AppendLine(FormatDateRange(start, end, FullDateFormat, MonthDateFormat, DayDateFormat,
+                    PreferredFormat, RangeDelim));
+                finalOutput.AppendLine(" | ");
+
+                //Across Years
+                start = new DateTime(DateTime.Now.Year, 12, 30);
+                end = new DateTime(DateTime.Now.Year + 1, 1, 2);
+                finalOutput.AppendLine("Different Years ... ");
+                finalOutput.AppendLine("Start: " + start.ToString("d") + " End: " + end.ToString("d") + " = ");
+                finalOutput.AppendLine(FormatDateRange(start, end, FullDateFormat, MonthDateFormat, DayDateFormat,
+                    PreferredFormat, RangeDelim));
+                finalOutput.AppendLine(" | ");
+
+                return finalOutput.ToString();
+            }
+            else
+            {
+                return FormatDateRange(StartDate, EndDate, FullDateFormat, MonthDateFormat, DayDateFormat,
+                    PreferredFormat, RangeDelim);
+            }           
+        }
+
+        [Obsolete("Use version with explicit RangeDelim provided")]
+        public static string FormatDateRange(DateTime StartDate, DateTime EndDate, string FullDateFormat,
+            string MonthDateFormat, string DayDateFormat, string PreferredFormat)
+        {
+            var RangeDelim = " - "; 
+            return FormatDateRange(StartDate, EndDate, FullDateFormat, MonthDateFormat, DayDateFormat,
+                PreferredFormat, RangeDelim);
+        }
+
 
         public static bool IsValidDate(string DateStringToTest, string DateFormat)
         {

@@ -13,16 +13,7 @@
     [Serializable]
     public static class Strings
     {
-        //TODO: Convert to use param list for unlimited testing values, like string.concat()
-        public static string NoEmptyString(string FirstPreferredString, string SecondString, string ThirdString = "")
-        {
-            if (FirstPreferredString != null & FirstPreferredString != "")
-            { return FirstPreferredString; }
-            else if (SecondString != null & SecondString != "")
-            { return SecondString; }
-            else
-            { return ThirdString; }
-        }
+        #region Testing String Values
 
         public static bool RegExMatchesExactly(string RegularExpression, string StringToTest, bool CaseSensitive = false)
         {
@@ -98,45 +89,6 @@
 
         }
 
-        public static string HtmlTagContents(string TagName, string TextToSearch)
-        {
-            string ReturnContent = "";
-
-            Regex TagRegex = new Regex(
-                  "<(?<tag>\\w*)>(?<text>.*)</\\k<tag>>",
-                RegexOptions.IgnoreCase
-                | RegexOptions.CultureInvariant
-                | RegexOptions.IgnorePatternWhitespace
-                | RegexOptions.Compiled
-                );
-
-            bool IsMatch = TagRegex.IsMatch(TextToSearch);
-            bool Found = false;
-
-            if (IsMatch)
-            {
-                // Capture all Matches in the InputText
-                MatchCollection AllMatches = TagRegex.Matches(TextToSearch);
-
-                for (int i = 0; i < AllMatches.Count; i++)
-                {
-                    if (!Found)
-                    {
-                        string Tag = AllMatches[i].Groups["tag"].Value;
-                        string Text = AllMatches[i].Groups["text"].Value;
-
-                        if (Tag == TagName)
-                        {
-                            ReturnContent = Text;
-                            Found = true;
-                        }
-                    }
-                }
-            }
-
-            return ReturnContent;
-        }
-
         public static bool UrlsAreOnSameDomain(string Url1, string Url2, string RelativeUrlAssumedDomain)
         {
             if (Url1.StartsWith("/") | Url1.StartsWith("~"))
@@ -164,6 +116,107 @@
                 return false;
             }
         }
+
+        public static bool IsNumeric(this string StringToTest)
+        {
+            try
+            {
+                decimal TestDec = Decimal.Parse(StringToTest);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                //TODO: Update using new code pattern:
+                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+                //var msg = string.Format("");
+                //Info.LogException("Extensions : String.IsNumeric", ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Tests whether a string contains any of the separate values specified in  a delimited string list
+        /// </summary>
+        /// <param name="StringToTest">The string which might contain one or more of the various values</param>
+        /// <param name="DelimitedListOfTestValues">All the values to test</param>
+        /// <param name="DelimChar">Character used as the delimiter</param>
+        /// <returns>TRUE if any of the values appears in the string. FALSE if NONE of the values appear in the string</returns>
+        public static bool ContainsValueFromList(this string StringToTest, string DelimitedListOfTestValues, char DelimChar, bool CaseSensitive = false)
+        {
+            bool ValueIsInString = false;
+            int TotalMatches = 0;
+
+            string StringToTestFin = "";
+            string DelimitedListOfTestValuesFin = "";
+
+            if (!CaseSensitive)
+            {
+                StringToTestFin = StringToTest.ToLower();
+                DelimitedListOfTestValuesFin = DelimitedListOfTestValues.ToLower();
+            }
+            else
+            {
+                StringToTestFin = StringToTest;
+                DelimitedListOfTestValuesFin = DelimitedListOfTestValues;
+            }
+
+            List<string> ValuesList = DelimitedListOfTestValuesFin.Split(DelimChar).ToList();
+
+            for (int i = 0; i < ValuesList.Count; i++)
+            {
+                string ThisValue = ValuesList[i].ToString();
+
+                if (StringToTestFin.Contains(ThisValue))
+                {
+                    TotalMatches++;
+                }
+            }
+
+            if (TotalMatches > 0)
+            { ValueIsInString = true; }
+
+            return ValueIsInString;
+
+        }
+
+        public static bool IsValidDate(this string DateStringToTest, string DateFormat)
+        {
+            bool ValidDate = false;
+            try
+            {
+                var DateTest = DateTime.ParseExact(DateStringToTest, DateFormat, null);
+
+                if (DateTest != null)
+                {
+                    ValidDate = true;
+                }
+
+            }
+            catch (Exception exNonValidDate)
+            {
+                //TODO: Update using new code pattern:
+                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+                //var msg = string.Format("");
+                //Info.LogException("Functions.StringIsValidDate", exNonValidDate, "[DateStringToTest=" + DateStringToTest + "] [DateFormat=" + DateFormat + "] FALSE value returned. No action necessary");
+                ValidDate = false;
+            }
+
+            return ValidDate;
+        }
+
+        public static bool IsValidEmailAddress(this string EmailToTest)
+        {
+            bool Result;
+            Regex rgx = new Regex(@"([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})");
+
+            Result = rgx.IsMatch(EmailToTest) ? true : false;
+
+            return Result;
+        }
+
+        #endregion
+
+        #region Altering String Values
 
         public static string ReplaceBadChars(string StringToFix, string WordSeparator = "-")
         {
@@ -208,75 +261,6 @@
             }
 
             return finalString;
-        }
-
-        /// <summary>
-        /// Converts a phone number in text format to a format which can be used in a 'tel:' link
-        /// </summary>
-        /// <param name="PhoneData">Original Phone number</param>
-        /// <param name="ReturnAllIfNoMatch">If it doesn't match a defined phone number format, should the whole string be returned as-is? (FALSE will return an empty string)</param>
-        /// <param name="StripChars">Remove additional characters such as ( ) - and spaces from the string</param>
-        /// <returns></returns>
-        public static string GetClickablePhoneNumber(string PhoneData, bool ReturnAllIfNoMatch = false, bool StripChars = false)
-        {
-            var returnString = "";
-
-            //TODO: Enhancement - Add support for international phone numbers
-            //Regex stuff to id US phone numbers
-            var countrycodes = "1";
-            var delimiters = "-|\\.|—|–|&nbsp;";
-            var phonedef = "\\+?(?:(?:(?:" + countrycodes + ")(?:\\s|" + delimiters + ")?)?\\(?[2-9]\\d{2}\\)?(?:\\s|"
-                           + delimiters + ")?[2-9]\\d{2}(?:" + delimiters + ")?[0-9a-z]{4})";
-
-            var regEx = new Regex(phonedef);
-
-            if (regEx.IsMatch(PhoneData))
-            {
-                var match = regEx.Match(PhoneData);
-                returnString = match.Value;
-            }
-            else
-            {
-                if (ReturnAllIfNoMatch)
-                {
-                    returnString = PhoneData;
-                }
-            }
-
-            if (StripChars)
-            {
-                returnString = returnString.Replace("-", "").Replace(".", "").Replace("(", "").Replace(")", "").Replace(" ", "");
-            }
-
-            if (!returnString.StartsWith("+"))
-            {
-                returnString = string.Format("+{0}", returnString);
-            }
-
-            return returnString;
-        }
-
-        public static List<string> ConvertToList(this string DelimitedString, char Separator)
-        {
-            List<string> MyList = new List<string>(DelimitedString.Split(Separator));
-            return MyList;
-        }
-
-        public static bool IsNumeric(this string StringToTest)
-        {
-            try
-            {
-                decimal TestDec = Decimal.Parse(StringToTest);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                //TODO: Update using new code pattern:
-                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-                //var msg = string.Format("");
-                //Info.LogException("Extensions : String.IsNumeric", ex);
-                return false;
-            }
         }
 
         public static string MakeCodeSafe(this string StringToFix, string WordSeparator = "-", bool ConvertNumbersToWords = false)
@@ -403,86 +387,6 @@
         }
 
         /// <summary>
-        /// Tests whether a string contains any of the separate values specified in  a delimited string list
-        /// </summary>
-        /// <param name="StringToTest">The string which might contain one or more of the various values</param>
-        /// <param name="DelimitedListOfTestValues">All the values to test</param>
-        /// <param name="DelimChar">Character used as the delimiter</param>
-        /// <returns>TRUE if any of the values appears in the string. FALSE if NONE of the values appear in the string</returns>
-        public static bool ContainsValueFromList(this string StringToTest, string DelimitedListOfTestValues, char DelimChar, bool CaseSensitive = false)
-        {
-            bool ValueIsInString = false;
-            int TotalMatches = 0;
-
-            string StringToTestFin = "";
-            string DelimitedListOfTestValuesFin = "";
-
-            if (!CaseSensitive)
-            {
-                StringToTestFin = StringToTest.ToLower();
-                DelimitedListOfTestValuesFin = DelimitedListOfTestValues.ToLower();
-            }
-            else
-            {
-                StringToTestFin = StringToTest;
-                DelimitedListOfTestValuesFin = DelimitedListOfTestValues;
-            }
-
-            List<string> ValuesList = DelimitedListOfTestValuesFin.Split(DelimChar).ToList();
-
-            for (int i = 0; i < ValuesList.Count; i++)
-            {
-                string ThisValue = ValuesList[i].ToString();
-
-                if (StringToTestFin.Contains(ThisValue))
-                {
-                    TotalMatches++;
-                }
-            }
-
-            if (TotalMatches > 0)
-            { ValueIsInString = true; }
-
-            return ValueIsInString;
-
-        }
-
-        public static bool IsValidDate(this string DateStringToTest, string DateFormat)
-        {
-            bool ValidDate = false;
-            try
-            {
-                var DateTest = DateTime.ParseExact(DateStringToTest, DateFormat, null);
-
-                if (DateTest != null)
-                {
-                    ValidDate = true;
-                }
-
-            }
-            catch (Exception exNonValidDate)
-            {
-                //TODO: Update using new code pattern:
-                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-                //var msg = string.Format("");
-                //Info.LogException("Functions.StringIsValidDate", exNonValidDate, "[DateStringToTest=" + DateStringToTest + "] [DateFormat=" + DateFormat + "] FALSE value returned. No action necessary");
-                ValidDate = false;
-            }
-
-            return ValidDate;
-        }
-
-        public static bool IsValidEmailAddress(this string EmailToTest)
-        {
-            bool Result;
-            Regex rgx = new Regex(@"([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})");
-
-            Result = rgx.IsMatch(EmailToTest) ? true : false;
-
-            return Result;
-        }
-
-        /// <summary>
         /// Using a dictionary of replacement keys with their corresponding values,
         /// replace the placeholders in the Template content. 
         /// </summary>
@@ -574,6 +478,192 @@
             return finalString;
         }
 
+        public static string SplitByTokenIfItExists(string Name, string Token)
+        {
+            if (Name.IndexOf(Token) > -1)
+            {
+                return Name.Substring(0, Name.IndexOf(Token));
+            }
+            return Name;
+        }
+
+        public static string StripNumbers(string TextWithNumbers)
+        {
+            var stripped = TextWithNumbers;
+
+            stripped = new String(TextWithNumbers.Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
+
+            return stripped;
+        }
+
+        [Obsolete("Use 'RemoveAllParagraphTags()")]
+        public static string RemoveParagraphTags(this string Html, bool RetainBreaks)
+        {
+            return Html.RemoveAllParagraphTags(RetainBreaks);
+        }
+
+        [Obsolete("Use 'RemoveAllParagraphTags()")]
+        public static IHtmlString RemoveParagraphTags(this IHtmlString Html, bool RetainBreaks)
+        {
+            return Html.RemoveAllParagraphTags(RetainBreaks);
+        }
+
+        public static string RemoveAllParagraphTags(this string Html, bool RetainBreaks)
+        {
+            var result = RemoveAllParagraphTags(new HtmlString(Html), RetainBreaks);
+            return result.ToString();
+        }
+
+        public static IHtmlString RemoveAllParagraphTags(this IHtmlString Html, bool RetainBreaks)
+        {
+            var result = Html.ToString();
+
+            if (RetainBreaks)
+            {
+                result = result.Replace("\r\n<p>", "<br/><br/>");
+                result = result.Replace("</p><p>", "<br/><br/>");
+            }
+            result = result.Replace("<p>", "");
+            result = result.Replace("</p>", " ");
+
+            return new HtmlString(result);
+        }
+
+        public static string RemoveOuterParagrahTags(this string HtmlToFix)
+        {
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(HtmlToFix);
+            string result = doc.DocumentNode.FirstChild.InnerHtml;
+
+            return result;
+        }
+
+        public static IHtmlString RemoveOuterParagrahTags(this IHtmlString HtmlToFix)
+        {
+            string result = RemoveOuterParagrahTags(HtmlToFix.ToString());
+            return new HtmlString(result);
+        }
+
+        public static IHtmlString ReplaceLineBreaksForWeb(this string StringToFix)
+        {
+            return new HtmlString(StringToFix.Replace("\r\n", "<br />").Replace("\n", "<br />"));
+        }
+
+        #endregion
+
+        #region Returning a String from a String or Multiple Strings
+
+        //TODO: Convert to use param list for unlimited testing values, like string.concat()
+        public static string NoEmptyString(string FirstPreferredString, string SecondString, string ThirdString = "")
+        {
+            if (FirstPreferredString != null & FirstPreferredString != "")
+            { return FirstPreferredString; }
+            else if (SecondString != null & SecondString != "")
+            { return SecondString; }
+            else
+            { return ThirdString; }
+        }
+
+        public static string HtmlTagContents(string TagName, string TextToSearch)
+        {
+            string ReturnContent = "";
+
+            Regex TagRegex = new Regex(
+                "<(?<tag>\\w*)>(?<text>.*)</\\k<tag>>",
+                RegexOptions.IgnoreCase
+                | RegexOptions.CultureInvariant
+                | RegexOptions.IgnorePatternWhitespace
+                | RegexOptions.Compiled
+            );
+
+            bool IsMatch = TagRegex.IsMatch(TextToSearch);
+            bool Found = false;
+
+            if (IsMatch)
+            {
+                // Capture all Matches in the InputText
+                MatchCollection AllMatches = TagRegex.Matches(TextToSearch);
+
+                for (int i = 0; i < AllMatches.Count; i++)
+                {
+                    if (!Found)
+                    {
+                        string Tag = AllMatches[i].Groups["tag"].Value;
+                        string Text = AllMatches[i].Groups["text"].Value;
+
+                        if (Tag == TagName)
+                        {
+                            ReturnContent = Text;
+                            Found = true;
+                        }
+                    }
+                }
+            }
+
+            return ReturnContent;
+        }
+
+        /// <summary>
+        /// Converts a phone number in text format to a format which can be used in a 'tel:' link
+        /// </summary>
+        /// <param name="PhoneData">Original Phone number</param>
+        /// <param name="ReturnAllIfNoMatch">If it doesn't match a defined phone number format, should the whole string be returned as-is? (FALSE will return an empty string)</param>
+        /// <param name="StripChars">Remove additional characters such as ( ) - and spaces from the string</param>
+        /// <returns></returns>
+        public static string GetClickablePhoneNumber(string PhoneData, bool ReturnAllIfNoMatch = false, bool StripChars = false)
+        {
+            var returnString = "";
+
+            //TODO: Enhancement - Add support for international phone numbers
+            //Regex stuff to id US phone numbers
+            var countrycodes = "1";
+            var delimiters = "-|\\.|—|–|&nbsp;";
+            var phonedef = "\\+?(?:(?:(?:" + countrycodes + ")(?:\\s|" + delimiters + ")?)?\\(?[2-9]\\d{2}\\)?(?:\\s|"
+                           + delimiters + ")?[2-9]\\d{2}(?:" + delimiters + ")?[0-9a-z]{4})";
+
+            var regEx = new Regex(phonedef);
+
+            if (regEx.IsMatch(PhoneData))
+            {
+                var match = regEx.Match(PhoneData);
+                returnString = match.Value;
+            }
+            else
+            {
+                if (ReturnAllIfNoMatch)
+                {
+                    returnString = PhoneData;
+                }
+            }
+
+            if (StripChars)
+            {
+                returnString = returnString.Replace("-", "").Replace(".", "").Replace("(", "").Replace(")", "").Replace(" ", "");
+            }
+
+            if (!returnString.StartsWith("+"))
+            {
+                returnString = string.Format("+{0}", returnString);
+            }
+
+            return returnString;
+        }
+
+        public static string GetDomain(string Url)
+        {
+            var domain = new Uri(Url).Host;
+            return domain;
+        }
+
+        #endregion
+
+        #region Misc
+        public static List<string> ConvertToList(this string DelimitedString, char Separator)
+        {
+            List<string> MyList = new List<string>(DelimitedString.Split(Separator));
+            return MyList;
+        }
+
         /// <summary>
         /// Count occurrences of a string inside another string.
         /// </summary>
@@ -588,34 +678,6 @@
                 count++;
             }
             return count;
-        }
-
-
-        public static string GetDomain(string Url)
-        {
-            var domain = new Uri(Url).Host;
-            return domain;
-        }
-
-        public static string RemoveParagraphTags(this string Html, bool RetainBreaks)
-        {
-            var result = RemoveParagraphTags(new HtmlString(Html), RetainBreaks);
-            return result.ToString();
-        }
-
-        public static IHtmlString RemoveParagraphTags(this IHtmlString Html, bool RetainBreaks)
-        {
-            var result = Html.ToString();
-
-            if (RetainBreaks)
-            {
-                result = result.Replace("\r\n<p>", "<br/><br/>");
-                result = result.Replace("</p><p>", "<br/><br/>");
-            }
-            result = result.Replace("<p>", "");
-            result = result.Replace("</p>", " ");
-
-            return new HtmlString(result);
         }
 
         public static Dictionary<string, string> ConvertToDictionary(this string[] StringArray, char Separator = '=')
@@ -662,24 +724,7 @@
 
             return MyString;
         }
-
-        public static string SplitByTokenIfItExists(string Name, string Token)
-        {
-            if (Name.IndexOf(Token) > -1)
-            {
-                return Name.Substring(0, Name.IndexOf(Token));
-            }
-            return Name;
-        }
-        
-        public static string StripNumbers(string TextWithNumbers)
-        {
-            var stripped = TextWithNumbers;
-
-            stripped = new String(TextWithNumbers.Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
-
-            return stripped;
-        }
+        #endregion
 
     }
 }

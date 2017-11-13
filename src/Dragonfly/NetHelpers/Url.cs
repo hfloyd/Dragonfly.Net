@@ -10,6 +10,196 @@
     {
         private const string ThisClassName = "Dragonfly.NetHelpers.Url";
 
+        #region Read Data from Url
+
+        /// <summary>
+        /// Parse a Query string, returning a Dictionary representing all the Query String Values
+        /// </summary>
+        /// <param name="Query">Query-string portion of a url</param>
+        /// <returns>Dictionary&gt;string, string&lt;</returns>
+        public static Dictionary<string, string> GetQueryStringDictionary(string Query)
+        {
+            var returnDict = new Dictionary<string, string>();
+
+            if (Query != "")
+            {
+                var splitString = Query.Replace("?", "").Split('&');
+
+                foreach (var pairString in splitString)
+                {
+                    var pair = pairString.Split('=');
+                    returnDict.Add(pair[0], pair[1]);
+                }
+            }
+
+            return returnDict;
+        }
+
+        /// <summary>
+        /// Compares 2 URls to see if they are on the same top-level-domain
+        /// </summary>
+        /// <param name="Url1">First Url</param>
+        /// <param name="Url2">Second Url</param>
+        /// <param name="RelativeUrlAssumedDomain">If there is no TLD (a relative Url) assume that this is on the same domain</param>
+        /// <returns></returns>
+        public static bool UrlsAreOnSameDomain(string Url1, string Url2, string RelativeUrlAssumedDomain)
+        {
+            if (Url1.StartsWith("/") | Url1.StartsWith("~"))
+            {
+                Url1 = RelativeUrlAssumedDomain + Url1;
+            }
+
+            if (Url2.StartsWith("/") | Url2.StartsWith("~"))
+            {
+                Url2 = RelativeUrlAssumedDomain + Url2;
+            }
+
+            Uri Uri1 = new Uri(Url1);
+            Uri Uri2 = new Uri(Url2);
+
+            // There are overlaods for the constructor too
+            //Uri uri3 = new Uri(url3, UriKind.Absolute);
+
+            if (Uri1.Host == Uri2.Host)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Returns a string value (empty string, if missing)
+        /// </summary>
+        /// <param name="Request">HttpRequest (Just use 'Request')</param>
+        /// <param name="QueryStringKey">Key name</param>
+        /// <returns></returns>
+        public static string GetSafeQueryString(System.Web.HttpRequestBase Request, string QueryStringKey)
+        {
+            var returnVal = "";
+
+            var qsVal = Request.QueryString[QueryStringKey];
+
+            if (!string.IsNullOrEmpty(qsVal))
+            {
+                returnVal = qsVal;
+            }
+
+            return returnVal;
+        }
+
+        /// <summary>
+        /// Returns a boolean value. Assumes "True" or "true" as string. (false, if missing) 
+        /// </summary>
+        /// <param name="Request">HttpRequest (Just use 'Request')</param>
+        /// <param name="QueryStringKey">Key name</param>
+        /// <returns></returns>
+        public static bool GetSafeQueryBool(System.Web.HttpRequestBase Request, string QueryStringKey)
+        {
+            var returnVal = false;
+
+            var qsVal = Request.QueryString[QueryStringKey];
+
+            if (!string.IsNullOrEmpty(qsVal))
+            {
+                if (qsVal.ToLower() == "true")
+                {
+                    returnVal = true;
+                }
+            }
+            return returnVal;
+        }
+
+        static string GetSafeQuery(this Uri uri)
+        {
+            //Copied from https://github.com/umbraco/Umbraco-CMS/blob/d50e49ad37fd5ca7bad2fd6e8fc994f3408ae70c/src/Umbraco.Core/UriExtensions.cs
+
+            if (uri.IsAbsoluteUri)
+                return uri.Query;
+
+            // cannot get .Query on relative uri (InvalidOperation)
+            var s = uri.OriginalString;
+            var posq = s.IndexOf("?", StringComparison.Ordinal);
+            var posf = s.IndexOf("#", StringComparison.Ordinal);
+            var query = posq < 0 ? null : (posf < 0 ? s.Substring(posq) : s.Substring(posq, posf - posq));
+
+            return query;
+        }
+
+        #endregion
+
+        #region Goto Url
+
+        /// <summary>
+        /// Method to simplify calling an external url.  Any results from the url will be saved as a string that can
+        /// either be xml, html, json, etc etc.  It won't handle calling files directly, I think, not tried it,
+        /// not had a need.  It works great with string based result though.
+        /// </summary>
+        /// <param name="url">The url you want to call</param>
+        /// <param name="method">How you want to call it: "GET" or "POST"</param>
+        /// <returns></returns>
+        public static string CallUrl(string Url, string Method, string UserAgentString = "C# Application (compatible; MSIE 6.0; Windows NT 5.1)")
+        {
+            //From http://you.arenot.me/2010/09/28/facebooks-graph-api-and-asp-net/
+            string UserAgent = UserAgentString;
+            int _timeout = 300000;
+
+            HttpWebRequest req = null;
+            HttpWebResponse res = null;
+
+            // Initialise the web request
+            req = (HttpWebRequest)WebRequest.Create(Url);
+            req.Method = Method.Length > 0 ? Method : "POST";
+
+            req.UserAgent = UserAgent;
+
+            // if (Proxy != null) req.Proxy = Proxy;
+            req.Timeout = _timeout;
+            req.KeepAlive = false;
+
+            // This is needed in the Compact Framework
+            // See for more details: http://msdn2.microsoft.com/en-us/library/1afx2b0f.aspx
+            if (Method != "GET")
+                req.GetRequestStream().Close();
+
+            string responseString = String.Empty;
+
+            try
+            {
+                // Get response from the internet
+                res = (HttpWebResponse)req.GetResponse();
+                using (StreamReader sr = new StreamReader(res.GetResponseStream()))
+                {
+                    responseString = sr.ReadToEnd();
+                }
+            }
+            catch (Exception ex)
+            {
+                //TODO: Update using new code pattern:
+                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+                //var msg = string.Format("");
+                //Info.LogException("Functions.CallUrl", ex);
+            }
+
+            return responseString;
+        }
+
+        /// <summary>
+        /// Just an overload of above.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static string CallUrl(string Url)
+        {
+            return CallUrl(Url, "GET");
+        }
+
+        #endregion
+
+        #region Edit/Build Url
+
         /// <summary>
         /// Updates a URL with new/additional query string values
         /// </summary>
@@ -118,128 +308,6 @@
         }
 
         /// <summary>
-        /// Parse a Query string, returning a Dictionary representing all the Query String Values
-        /// </summary>
-        /// <param name="Query">Query-string portion of a url</param>
-        /// <returns>Dictionary&gt;string, string&lt;</returns>
-        public static Dictionary<string, string> GetQueryStringDictionary(string Query)
-        {
-            var returnDict = new Dictionary<string, string>();
-
-            if (Query != "")
-            {
-                var splitString = Query.Replace("?", "").Split('&');
-
-                foreach (var pairString in splitString)
-                {
-                    var pair = pairString.Split('=');
-                    returnDict.Add(pair[0], pair[1]);
-                }
-            }
-
-            return returnDict;
-        }
-
-        /// <summary>
-        /// Method to simplify calling an external url.  Any results from the url will be saved as a string that can
-        /// either be xml, html, json, etc etc.  It won't handle calling files directly, I think, not tried it,
-        /// not had a need.  It works great with string based result though.
-        /// </summary>
-        /// <param name="url">The url you want to call</param>
-        /// <param name="method">How you want to call it: "GET" or "POST"</param>
-        /// <returns></returns>
-        public static string CallUrl(string Url, string Method, string UserAgentString = "C# Application (compatible; MSIE 6.0; Windows NT 5.1)")
-        {
-            //From http://you.arenot.me/2010/09/28/facebooks-graph-api-and-asp-net/
-            string UserAgent = UserAgentString;
-            int _timeout = 300000;
-
-            HttpWebRequest req = null;
-            HttpWebResponse res = null;
-
-            // Initialise the web request
-            req = (HttpWebRequest)WebRequest.Create(Url);
-            req.Method = Method.Length > 0 ? Method : "POST";
-
-            req.UserAgent = UserAgent;
-
-            // if (Proxy != null) req.Proxy = Proxy;
-            req.Timeout = _timeout;
-            req.KeepAlive = false;
-
-            // This is needed in the Compact Framework
-            // See for more details: http://msdn2.microsoft.com/en-us/library/1afx2b0f.aspx
-            if (Method != "GET")
-                req.GetRequestStream().Close();
-
-            string responseString = String.Empty;
-
-            try
-            {
-                // Get response from the internet
-                res = (HttpWebResponse)req.GetResponse();
-                using (StreamReader sr = new StreamReader(res.GetResponseStream()))
-                {
-                    responseString = sr.ReadToEnd();
-                }
-            }
-            catch (Exception ex)
-            {
-                //TODO: Update using new code pattern:
-                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-                //var msg = string.Format("");
-                //Info.LogException("Functions.CallUrl", ex);
-            }
-
-            return responseString;
-        }
-
-        /// <summary>
-        /// Just an overload of above.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static string CallUrl(string Url)
-        {
-            return CallUrl(Url, "GET");
-        }
-
-        /// <summary>
-        /// Compares 2 URls to see if they are on the same top-level-domain
-        /// </summary>
-        /// <param name="Url1">First Url</param>
-        /// <param name="Url2">Second Url</param>
-        /// <param name="RelativeUrlAssumedDomain">If there is no TLD (a relative Url) assume that this is on the same domain</param>
-        /// <returns></returns>
-        public static bool UrlsAreOnSameDomain(string Url1, string Url2, string RelativeUrlAssumedDomain)
-        {
-            if (Url1.StartsWith("/") | Url1.StartsWith("~"))
-            {
-                Url1 = RelativeUrlAssumedDomain + Url1;
-            }
-
-            if (Url2.StartsWith("/") | Url2.StartsWith("~"))
-            {
-                Url2 = RelativeUrlAssumedDomain + Url2;
-            }
-
-            Uri Uri1 = new Uri(Url1);
-            Uri Uri2 = new Uri(Url2);
-
-            // There are overlaods for the constructor too
-            //Uri uri3 = new Uri(url3, UriKind.Absolute);
-
-            if (Uri1.Host == Uri2.Host)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Rewrites the path of uri.
         /// </summary>
         /// <param name="uri">The uri.</param>
@@ -269,7 +337,7 @@
         public static Uri Rewrite(this Uri uri, string path, string query)
         {
             //Copied from https://github.com/umbraco/Umbraco-CMS/blob/d50e49ad37fd5ca7bad2fd6e8fc994f3408ae70c/src/Umbraco.Core/UriExtensions.cs
-            
+
             if (path.StartsWith("/") == false)
                 throw new ArgumentException("Path must start with a slash.", "path");
             if (query.Length > 0 && query.StartsWith("?") == false)
@@ -282,21 +350,7 @@
                 : new Uri(path + query, UriKind.Relative);
         }
 
-        static string GetSafeQuery(this Uri uri)
-        {
-            //Copied from https://github.com/umbraco/Umbraco-CMS/blob/d50e49ad37fd5ca7bad2fd6e8fc994f3408ae70c/src/Umbraco.Core/UriExtensions.cs
-            
-            if (uri.IsAbsoluteUri)
-                return uri.Query;
-
-            // cannot get .Query on relative uri (InvalidOperation)
-            var s = uri.OriginalString;
-            var posq = s.IndexOf("?", StringComparison.Ordinal);
-            var posf = s.IndexOf("#", StringComparison.Ordinal);
-            var query = posq < 0 ? null : (posf < 0 ? s.Substring(posq) : s.Substring(posq, posf - posq));
-
-            return query;
-        }
+        #endregion
 
     }
 }
