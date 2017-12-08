@@ -655,6 +655,52 @@
             return domain;
         }
 
+        /// <summary>
+        /// Similar to String.Join(), but allows for 2 different separators in order to provide a natural text representation of a list 
+        /// (Example: 'A, B, and C' uses ', ' & ' and ' as the two separators.)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="Separator">First separator (ex: ', ')</param>
+        /// <param name="SeparatorLast">Second separator (ex: ' and ')</param>
+        /// <param name="Values">IEnumerable to provide strings</param>
+        /// <returns>String including all values</returns>
+        public static string JoinAsText<T>(string Separator, string SeparatorLast, IEnumerable<T> Values)
+        {
+            if (Values == null)
+            {
+                return "";
+            }
+
+            var values = Values.ToList();
+
+            if (!values.Any())
+            {
+                return "";
+            }
+
+            var total = values.Count();
+
+            if (total == 1)
+            {
+                return values.First().ToString();
+            }
+            else if (total == 2)
+            {
+                return string.Join(SeparatorLast, values);
+            }
+            else
+            {
+                var lastItem = values.Last();
+                values.Remove(lastItem);
+
+                var joinedString = string.Join(Separator, values);
+                joinedString += SeparatorLast + lastItem;
+
+                return joinedString;
+            }
+
+        }
+
         #endregion
 
         #region Misc

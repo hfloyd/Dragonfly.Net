@@ -7,7 +7,7 @@ namespace Dragonfly.NetModels
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="PagerBaseUrl">Base Url without any query string data</param>
+        /// <param name="PagerBaseUrl">Base Url without 'page' query string key</param>
         /// <param name="ItemsPerPage">Total number of items on each page</param>
         /// <param name="ThisPageNum">Current active page</param>
         /// <param name="TotalNumPages">Total number of pages</param>
@@ -19,7 +19,15 @@ namespace Dragonfly.NetModels
             TotalPages = TotalNumPages;
             QueryStringKey = PagerQueryStringKey;
 
-            BaseUrlWithQS = string.Format("{0}{1}=", PagerBaseUrl.EnsureEndsWith('?'), PagerQueryStringKey); 
+            if (PagerBaseUrl.Contains("?")&& !PagerBaseUrl.EndsWith("?"))
+            {
+                //Contained somewhere in the middle, so there is existing query string data, append page info
+                BaseUrlWithQS = string.Format("{0}{1}=", PagerBaseUrl.EnsureEndsWith('&'), PagerQueryStringKey);
+            }
+            else
+            {
+                BaseUrlWithQS = string.Format("{0}{1}=", PagerBaseUrl.EnsureEndsWith('?'), PagerQueryStringKey);
+            }
 
             FirstUrl = PagerBaseUrl;
             LastUrl = string.Format("{0}{1}", BaseUrlWithQS, TotalPages);

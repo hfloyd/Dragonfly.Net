@@ -215,6 +215,7 @@
             return AppendQueryStringToUrl(url, QsKey, QsValue, AppendMatchingTagDelim, NewAnchor);
         }
 
+
         /// <summary>
         /// Updates a URL with new/additional query string values
         /// </summary>
@@ -228,7 +229,8 @@
         {
             var uri = OriginalUri;
 
-            var baseUrl = uri.AbsolutePath;
+            var baseUrl = uri.AbsoluteUri;
+            var basePath = uri.AbsolutePath;
 
             //Anchor Tag
             var currAnchor = uri.Fragment.Replace("#", "");
@@ -243,13 +245,13 @@
                 }
                 else
                 { newAnchor = currAnchor; }
+
+                newAnchor = "#" + newAnchor;
             }
             else
             {
                 newAnchor = providedAnchor;
             }
-
-            newAnchor = "#" + newAnchor;
 
             //Query String Values
             var qs = GetQueryStringDictionary(uri.Query);
@@ -302,7 +304,7 @@
             //Build New Url
             var newUrl = string.Format("{0}?{1}{2}", baseUrl, allQs, newAnchor);
             newUrl = newUrl.Replace("?&", "?"); //Cleanup if all QS have been removed
-            uri.Rewrite(newUrl);
+            //uri.Rewrite(newUrl);
 
             return newUrl;
         }
