@@ -74,14 +74,14 @@
         /// <summary>
         /// Formats a range using two dates.
         /// </summary>
-        /// <param name="StartDate"></param>
-        /// <param name="EndDate"></param>
-        /// <param name="FullDateFormat">Format string for full date (including year) (ex: 'MMM, d, yyyy')</param>
-        /// <param name="MonthDateFormat">Format string to use when the months are different (ex: 'MM d', 'MMM d', 'MMMM dd')</param>
-        /// <param name="DayDateFormat">Format string to use when the days are different (ex: 'd, yy', 'd, yyyy')</param>
-        /// <param name="PreferredFormat">Preferred format for single-day (Options: 'y', 'm', or 'd')</param>
+        /// <param name="StartDate">Beginning date</param>
+        /// <param name="EndDate">Ending date</param>
+        /// <param name="FullDateFormat">Format string for full date (including year) (ex: <c>MMM d, yyyy</c>)</param>
+        /// <param name="MonthDateFormat">Format string to use when the months are different (ex: <c>MM d</c> , <c>MMM d</c> , <c>MMMM dd</c>)</param>
+        /// <param name="DayDateFormat">Format string to use when the days are different (ex: <c>d, yy</c>, <c>d, yyyy</c>)</param>
+        /// <param name="PreferredFormat">Preferred format for single-day (Options: <c>y</c>, <c>m</c>, or <c>d</c>)</param>
         /// <param name="RangeDelim">Separator to use for range </param>
-         /// <returns></returns>
+        /// <returns>String with both dates formatted and concatenated together</returns>
         public static string FormatDateRange(DateTime StartDate, DateTime EndDate, string FullDateFormat, string MonthDateFormat, string DayDateFormat, string PreferredFormat, string RangeDelim)
         {
             var finalDates = "";
@@ -152,15 +152,16 @@
         /// <summary>
         /// Formats a range using two dates.
         /// </summary>
-        /// <param name="StartDate"></param>
-        /// <param name="EndDate"></param>
-        /// <param name="FullDateFormat">Format string for full date (ex: 'MMM, d, yyyy')</param>
-        /// <param name="MonthDateFormat">Format string to use when the months are different (ex: 'MM d', 'MMM d', 'MMMM dd')</param>
-        /// <param name="DayDateFormat">Format string to use when the days are different (ex: 'd, yy', 'd, yyyy')</param>
-        /// <param name="PreferredFormat">Preferred format for single-day events (Options: 'y', 'm', or 'd')</param>
-        /// <param name="RangeDelim">Separator to use for range (Default = " - ")</param>
-        /// <param name="TestMode">When set to TRUE will display a variety of test start & end dates so you can see all possible formats using your formatting params.</param>
-        /// <returns></returns>
+        /// <param name="StartDate">Beginning date</param>
+        /// <param name="EndDate">Ending date</param>
+        /// <param name="FullDateFormat">Format string for full date (including year) (ex: <c>MMM d, yyyy</c>)</param>
+        /// <param name="MonthDateFormat">Format string to use when the months are different (ex: <c>MM d</c> , <c>MMM d</c> , <c>MMMM dd</c>)</param>
+        /// <param name="DayDateFormat">Format string to use when the days are different (ex: <c>d, yy</c>, <c>d, yyyy</c>)</param>
+        /// <param name="PreferredFormat">Preferred format for single-day (Options: <c>y</c>, <c>m</c>, or <c>d</c>)</param>
+        /// <param name="RangeDelim">Separator to use for range </param>
+        /// <returns>String with both dates formatted and concatenated together</returns>
+        /// <param name="TestMode">When set to TRUE will display a variety of test start &amp; end dates so you can see all possible formats using your formatting params.</param>
+        /// <returns>String with both dates formatted and concatenated together</returns>
         public static string FormatDateRange(DateTime StartDate, DateTime EndDate, string FullDateFormat,
             string MonthDateFormat, string DayDateFormat, string PreferredFormat, string RangeDelim,
             bool TestMode = false)
