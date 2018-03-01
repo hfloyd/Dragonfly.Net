@@ -8,10 +8,15 @@
     using System.Threading;
     using System.Web;
 
-    public class Files
+    /// <summary>
+    /// Helpers to handle File I/O
+    /// </summary>
+    public static class Files
     {
-        //TODO: Cleanup, add custom errors
+        //TODO: Cleanup, throw errors
         private const string ThisClassName = "Dragonfly.NetHelpers.Files";
+
+        #region Retrieve Remote Files (HTTP)
 
         /// <summary>
         /// Get a file from a url and save it to the filesystem.
@@ -78,6 +83,53 @@
                 //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
                 //var msg = string.Format("");
                 //Info.LogException("Files.DownloadFtpFile", ex);
+            }
+        }
+
+        #endregion
+
+        #region FTP
+        public static string[] GetFtpFileList(string FtpHostServer, string FtpUserName, string FtpPassword)
+        {
+            string[] downloadFiles;
+            StringBuilder result = new StringBuilder();
+            WebResponse response = null;
+            StreamReader reader = null;
+            try
+            {
+                FtpWebRequest reqFTP;
+                reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri("ftp://" + FtpHostServer + "/"));
+                reqFTP.UseBinary = true;
+                reqFTP.Credentials = new NetworkCredential(FtpUserName, FtpPassword);
+                reqFTP.Method = WebRequestMethods.Ftp.ListDirectory;
+                reqFTP.Proxy = null;
+                reqFTP.KeepAlive = false;
+                reqFTP.UsePassive = false;
+                response = reqFTP.GetResponse();
+                reader = new StreamReader(response.GetResponseStream());
+                string line = reader.ReadLine();
+                while (line != null)
+                {
+                    result.Append(line);
+                    result.Append("\n");
+                    line = reader.ReadLine();
+                }
+                // to remove the trailing '\n'
+                result.Remove(result.ToString().LastIndexOf('\n'), 1);
+                return result.ToString().Split('\n');
+            }
+            catch (Exception ex)
+            {
+                if (reader != null)
+                {
+                    reader.Close();
+                }
+                if (response != null)
+                {
+                    response.Close();
+                }
+                downloadFiles = null;
+                return downloadFiles;
             }
         }
 
@@ -157,7 +209,7 @@
                             catch (WebException exWeb)
                             {
                                 // Do nothing - consume this exception to force a new read of the rest of the file
-                                
+
                                 //TODO: Update using new code pattern:
                                 //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
                                 //var msg = string.Format("");
@@ -198,6 +250,127 @@
 
             return false;
         }
+
+        private static string FtpDirectoryStatus(string FtpHostServer, string username, string password, string FtpFolderPathToTest = "")
+        {
+            string ReturnMsg = "";
+            string FullDirToTest = "ftp://" + FtpHostServer + "/" + FtpFolderPathToTest;
+            //TODO: Update using new code pattern:
+            //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+            //var msg = string.Format("");
+            //Info.LogInfo("Files.FtpDirectoryExists: FullDirToTest=" + FullDirToTest);
+
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(FullDirToTest);
+            request.Credentials = new NetworkCredential(username, password);
+            string CredentialsInfo = request.Credentials.ToString();
+            request.Method = WebRequestMethods.Ftp.ListDirectory;
+
+            try
+            {
+                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                {
+                    // Okay.  
+                    ReturnMsg = "Server Connection Sucessful";
+                }
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response != null)
+                {
+                    FtpWebResponse response = (FtpWebResponse)ex.Response;
+                    ReturnMsg = response.StatusCode.ToString();
+
+                    if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
+                    {
+                        // Directory not found.  
+                        ReturnMsg += " - " + FullDirToTest;
+                    }
+                    else if (response.StatusCode == FtpStatusCode.NotLoggedIn)
+                    {
+                        // Directory not found.  
+                        ReturnMsg += " - " + CredentialsInfo;
+                    }
+
+                }
+                ReturnMsg = "Unknown";
+            }
+            return ReturnMsg;
+        }
+
+        private static string FtpServerStatus(string FtpHostServer, string username, string password)
+        {
+            string ReturnMsg = "";
+            string ServerToTest = "ftp://" + FtpHostServer + "/";
+            //TODO: Update using new code pattern:
+            //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+            //var msg = string.Format("");
+            //Info.LogInfo("Files.FtpServerStatus: ServerToTest=" + ServerToTest);
+
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(ServerToTest);
+            request.Credentials = new NetworkCredential(username, password);
+            string CredentialsInfo = request.Credentials.ToString();
+            request.Method = WebRequestMethods.Ftp.ListDirectory;
+
+            try
+            {
+                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                {
+                    // Okay.  
+                    ReturnMsg = "Server Connection Sucessful";
+                }
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response != null)
+                {
+                    FtpWebResponse response = (FtpWebResponse)ex.Response;
+                    ReturnMsg = response.StatusCode.ToString();
+
+                    if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
+                    {
+                        // Directory not found.  
+                        ReturnMsg += " - " + ServerToTest;
+                    }
+                    else if (response.StatusCode == FtpStatusCode.NotLoggedIn)
+                    {
+                        // Directory not found.  
+                        ReturnMsg += " - " + CredentialsInfo;
+                    }
+
+                }
+                ReturnMsg = "Unknown";
+            }
+            return ReturnMsg;
+        }
+
+        private static Stream GetFileAsStream(string ftpUrl, string username, string password, bool usePassive, long offset, int requestTimeout)
+        {
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(ftpUrl);
+
+            request.KeepAlive = false;
+            request.ReadWriteTimeout = requestTimeout;
+            request.Timeout = requestTimeout;
+            request.ContentOffset = offset;
+            request.UsePassive = usePassive;
+            request.UseBinary = true;
+
+            request.Credentials = new NetworkCredential(username, password);
+
+            request.Method = WebRequestMethods.Ftp.DownloadFile;
+
+            Stream fileResponseStream;
+
+            FtpWebResponse fileResponse = (FtpWebResponse)request.GetResponse();
+
+            fileResponseStream = fileResponse.GetResponseStream();
+
+            return fileResponseStream;
+        }
+
+
+        #endregion
+
+        #region Create Files/Folders
 
         public static bool CreateDirectoryIfMissing(string FolderPath)
         {
@@ -242,228 +415,175 @@
             return fs;
         }
 
-        public static string UnMapPath(string MappedPath)
+        /// <summary>
+        /// Writes some text to a provided file location.
+        /// </summary>
+        /// <param name="FilePath">Virtual or Physical path - Inlcuding the desired filename with a text-compatible extension (ex: .txt, .xml, .json, etc.)</param>
+        /// <param name="TextContent">Text to write to file</param>
+        /// <param name="CreateDirectoryIfMissing">If the directories int he path don't exist, create them rather than failing</param>
+        /// <param name="FailSilently">If TRUE won't throw an error on failure. Included for backward compatibility.</param>
+        /// <returns></returns>
+        public static bool CreateTextFile(string FilePath, string TextContent, bool CreateDirectoryIfMissing = false, bool FailSilently = true)
         {
-            string RootMapPath = HttpContext.Current.Server.MapPath("/");
-            string VirtualPath = "";
-            
+            var mappedFilePath = Files.GetMappedPath(FilePath);
 
-            VirtualPath = MappedPath.ToLower(); //start with the provided MappedPath, standardized to lowercase to make replacing easy.
-            VirtualPath = VirtualPath.Replace(RootMapPath.ToLower(), ""); //Get rid of the portion to the website root
-
-            string BackslashChar = @"\";
-            VirtualPath = VirtualPath.Replace(BackslashChar, "/")  ; //flip the slashes
-
-            return VirtualPath;
-        }
-
-        public static string GetMappedPath(string MappedOrRelativePath)
-        {
-            string MappedFolderPath = "";
             try
             {
-                MappedFolderPath = HttpContext.Current.Server.MapPath(MappedOrRelativePath);
-            }
-            catch (HttpException exMapPath)
-            {
-                //TODO: Update using new code pattern:
-                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-                //var msg = string.Format("");
-                //Info.LogException("Files.GetMappedPath", exMapPath, "(Error handled by Code - Path was already mapped)", true);
-                MappedFolderPath = MappedOrRelativePath;
-            }
-
-            return MappedFolderPath;
-        }
-      
-         public static string[] GetFtpFileList(string FtpHostServer, string FtpUserName, string FtpPassword)
-        {
-            string[] downloadFiles;
-            StringBuilder result = new StringBuilder();
-            WebResponse response = null;
-            StreamReader reader = null;
-            try
-            {
-                FtpWebRequest reqFTP;
-                reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri("ftp://" + FtpHostServer + "/"));
-                reqFTP.UseBinary = true;
-                reqFTP.Credentials = new NetworkCredential(FtpUserName, FtpPassword);
-                reqFTP.Method = WebRequestMethods.Ftp.ListDirectory;
-                reqFTP.Proxy = null;
-                reqFTP.KeepAlive = false;
-                reqFTP.UsePassive = false;
-                response = reqFTP.GetResponse();
-                reader = new StreamReader(response.GetResponseStream());
-                string line = reader.ReadLine();
-                while (line != null)
+                if (CreateDirectoryIfMissing)
                 {
-                    result.Append(line);
-                    result.Append("\n");
-                    line = reader.ReadLine();
+                    string directoryName = Path.GetDirectoryName(FilePath);
+
+                    if (Directory.Exists(directoryName) == false)
+                    {
+                        Directory.CreateDirectory(directoryName);
+                    }
                 }
-                // to remove the trailing '\n'
-                result.Remove(result.ToString().LastIndexOf('\n'), 1);
-                return result.ToString().Split('\n');
+
+                // WriteAllText creates a file, writes the specified string to the file,
+                // and then closes the file.    You do NOT need to call Flush() or Close().
+                System.IO.File.WriteAllText(mappedFilePath, TextContent);
             }
             catch (Exception ex)
             {
-                if (reader != null)
+                if (!FailSilently)
                 {
-                    reader.Close();
+                    //Pass error back up
+                    throw ex;
                 }
-                if (response != null)
-                {
-                    response.Close();
-                }                
-                downloadFiles = null;
-                return downloadFiles;
+
+                return false;
+                //var msg = "";
+                //if (ex.Message.Contains("path's format is not supported"))
+                //{
+                //    var functionName = string.Format("{0}.CreateTextFile", ThisClassName);
+                //    if (mappedFilePath.Contains(":"))
+                //    {msg = "Do you have a colon in the filename?";}
+                //   // Info.LogException(functionName, ex, msg);
+                //}
+            }
+            return true;
+        }
+
+        public static void WriteToTextFile(string FilePath, string TextToWrite, bool Overwrite = false, bool PrefixWithTimestamp = true)
+        {
+            string LogFilePath = "";
+            try
+            {
+                LogFilePath = HttpContext.Current.Server.MapPath(FilePath);
+            }
+            catch (System.Web.HttpException exMapPath)
+            {
+                var functionName = string.Format("{0}.WriteToTextFile", ThisClassName);
+                //Info.LogException(functionName, exMapPath, "(Error handled by Code)", true);
+                LogFilePath = FilePath;
+            }
+
+            string textLine;
+
+            if (PrefixWithTimestamp)
+            {
+                textLine = DateTime.Now + "---" + TextToWrite;
+                //('yyyy-mm-dd-HH:MM:SS') + 
+            }
+            else
+            {
+                textLine = TextToWrite;
+            }
+
+            if (Overwrite == true | File.Exists(LogFilePath) == false)
+            {
+                FileStream fsNew = Files.CreateFileAndDirectory(LogFilePath);
+                StreamWriter swNew = new StreamWriter(fsNew);
+                swNew.WriteLine(textLine);
+                swNew.Close();
+                fsNew.Close();
+            }
+            else
+            {
+                StreamWriter swAppend = File.AppendText(LogFilePath);
+                swAppend.WriteLine(textLine);
+                swAppend.Close();
             }
         }
 
-         private static Stream GetFileAsStream(string ftpUrl, string username, string password, bool usePassive, long offset, int requestTimeout)
-         {
-             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(ftpUrl);
 
-             request.KeepAlive = false;
-             request.ReadWriteTimeout = requestTimeout;
-             request.Timeout = requestTimeout;
-             request.ContentOffset = offset;
-             request.UsePassive = usePassive;
-             request.UseBinary = true;
+        #endregion
 
-             request.Credentials = new NetworkCredential(username, password);
+        #region Read Files
 
-             request.Method = WebRequestMethods.Ftp.DownloadFile;
+        /// <summary>
+        /// Reads a Text file, returning contents as a string
+        /// </summary>
+        /// <param name="FilePath">Full path to file</param>
+        /// <returns></returns>
+        public static string GetTextFileContents(string FilePath)
+        {
+            var mappedFilePath = Files.GetMappedPath(FilePath);
 
-             Stream fileResponseStream;
+            string readText = File.ReadAllText(mappedFilePath);
 
-             FtpWebResponse fileResponse = (FtpWebResponse)request.GetResponse();
+            return readText;
+        }
 
-             fileResponseStream = fileResponse.GetResponseStream();
+        //public static bool DisplayFileFromServer(Uri serverUri)
+            //{
+            //    // The serverUri parameter should start with the ftp:// scheme. 
+            //    if (serverUri.Scheme != Uri.UriSchemeFtp)
+            //    {
+            //        return false;
+            //    }
+            //    // Get the object used to communicate with the server.
+            //    WebClient request = new WebClient();
 
-             return fileResponseStream;
-         }
+            //    // This example assumes the FTP site uses anonymous logon.
+            //    request.Credentials = new NetworkCredential("anonymous", "janeDoe@contoso.com");
+            //    try
+            //    {
+            //        byte[] newFileData = request.DownloadData(serverUri.ToString());
+            //        string fileString = System.Text.Encoding.UTF8.GetString(newFileData);
+            //        Console.WriteLine(fileString);
+            //    }
+            //    catch (WebException e)
+            //    {
+            //        Console.WriteLine(e.ToString());
+            //    }
+            //    return true;
+            //}
 
-         private static long GetFileLength(string FtpHostServer, string username, string password, string FtpFilePath, bool usePassive)
-         {
-             string RemoteURL = "ftp://" + FtpHostServer + "/" + FtpFilePath;
+            #endregion
 
-             FtpWebRequest requestServerTest = (FtpWebRequest)WebRequest.Create(FtpHostServer);
-             requestServerTest.Credentials = new NetworkCredential(username, password);
-             requestServerTest.Method = WebRequestMethods.Ftp.ListDirectory;
-             FtpWebResponse ServerResponse = (FtpWebResponse)requestServerTest.GetResponse();
-             //TODO: Update using new code pattern:
-             //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-             //var msg = string.Format("");
-             //Info.LogInfo("Files.GetFileLength : Server Test Response=" + ServerResponse.ToString());
+            #region Get File Information
+
+            private static long GetFileLength(string FtpHostServer, string username, string password, string FtpFilePath, bool usePassive)
+        {
+            string RemoteURL = "ftp://" + FtpHostServer + "/" + FtpFilePath;
+
+            FtpWebRequest requestServerTest = (FtpWebRequest)WebRequest.Create(FtpHostServer);
+            requestServerTest.Credentials = new NetworkCredential(username, password);
+            requestServerTest.Method = WebRequestMethods.Ftp.ListDirectory;
+            FtpWebResponse ServerResponse = (FtpWebResponse)requestServerTest.GetResponse();
+            //TODO: Update using new code pattern:
+            //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+            //var msg = string.Format("");
+            //Info.LogInfo("Files.GetFileLength : Server Test Response=" + ServerResponse.ToString());
 
 
-             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(RemoteURL);
-             //TODO: Update using new code pattern:
-             //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-             //var msg = string.Format("");
-             //Info.LogInfo("Files.GetFileLength : RequestUri=" + request.RequestUri);
-             request.KeepAlive = false;
-             request.UsePassive = usePassive;
-             request.Credentials = new NetworkCredential(username, password);
-             request.Method = WebRequestMethods.Ftp.GetFileSize;
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(RemoteURL);
+            //TODO: Update using new code pattern:
+            //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+            //var msg = string.Format("");
+            //Info.LogInfo("Files.GetFileLength : RequestUri=" + request.RequestUri);
+            request.KeepAlive = false;
+            request.UsePassive = usePassive;
+            request.Credentials = new NetworkCredential(username, password);
+            request.Method = WebRequestMethods.Ftp.GetFileSize;
 
-             FtpWebResponse lengthResponse = (FtpWebResponse)request.GetResponse();
-             long length = lengthResponse.ContentLength;
-             lengthResponse.Close();
-             return length;
+            FtpWebResponse lengthResponse = (FtpWebResponse)request.GetResponse();
+            long length = lengthResponse.ContentLength;
+            lengthResponse.Close();
+            return length;
 
-         }
-
-         private static string FtpDirectoryStatus(string FtpHostServer, string username, string password, string FtpFolderPathToTest = "")
-         {
-             string ReturnMsg = "";
-             string FullDirToTest = "ftp://" + FtpHostServer + "/" + FtpFolderPathToTest;
-             //TODO: Update using new code pattern:
-             //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-             //var msg = string.Format("");
-             //Info.LogInfo("Files.FtpDirectoryExists: FullDirToTest=" + FullDirToTest);
-
-             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(FullDirToTest);
-             request.Credentials = new NetworkCredential(username, password);
-             string CredentialsInfo = request.Credentials.ToString();
-             request.Method = WebRequestMethods.Ftp.ListDirectory;
-            
-             try
-             {    using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
-                 {
-                     // Okay.  
-                     ReturnMsg = "Server Connection Sucessful";
-                 }
-             }
-             catch (WebException ex)
-             {
-                 if (ex.Response != null)
-                 {
-                     FtpWebResponse response = (FtpWebResponse)ex.Response;
-                     ReturnMsg = response.StatusCode.ToString();
-
-                     if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
-                     {
-                         // Directory not found.  
-                         ReturnMsg += " - " + FullDirToTest;
-                     }
-                     else if (response.StatusCode == FtpStatusCode.NotLoggedIn)
-                     {
-                         // Directory not found.  
-                         ReturnMsg += " - " + CredentialsInfo;
-                     }
-                     
-                 }
-                 ReturnMsg = "Unknown";
-             }
-             return ReturnMsg;
-         }
-
-         private static string FtpServerStatus(string FtpHostServer, string username, string password)
-         {
-             string ReturnMsg = "";
-             string ServerToTest = "ftp://" + FtpHostServer + "/";
-             //TODO: Update using new code pattern:
-             //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-             //var msg = string.Format("");
-             //Info.LogInfo("Files.FtpServerStatus: ServerToTest=" + ServerToTest);
-
-                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(ServerToTest);
-                 request.Credentials = new NetworkCredential(username, password);
-                 string CredentialsInfo = request.Credentials.ToString();
-                 request.Method = WebRequestMethods.Ftp.ListDirectory;
-
-             try
-             {    using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
-                 {
-                     // Okay.  
-                     ReturnMsg = "Server Connection Sucessful";
-                 }
-             }
-             catch (WebException ex)
-             {
-                 if (ex.Response != null)
-                 {
-                     FtpWebResponse response = (FtpWebResponse)ex.Response;
-                     ReturnMsg = response.StatusCode.ToString();
-
-                     if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
-                     {
-                         // Directory not found.  
-                         ReturnMsg += " - " + ServerToTest;
-                     }
-                     else if (response.StatusCode == FtpStatusCode.NotLoggedIn)
-                     {
-                         // Directory not found.  
-                         ReturnMsg += " - " + CredentialsInfo;
-                     }
-                     
-                 }
-                 ReturnMsg = "Unknown";
-             }
-             return ReturnMsg;
-         }
+        }
 
         /// <summary>
         /// Convert bytes into a friendlier format
@@ -485,79 +605,6 @@
             string result = string.Format(FormatString, len, sizes[order]);
 
             return result;
-        }
-
-        public static void WriteToTextFile(string FilePath, string TextToWrite, bool Overwrite = false, bool PrefixWithTimestamp = true)
-        {
-            string LogFilePath = "";
-            try
-            {
-                LogFilePath = HttpContext.Current.Server.MapPath(FilePath);
-            }
-            catch (System.Web.HttpException exMapPath)
-            {
-                var functionName = string.Format("{0}.WriteToTextFile", ThisClassName);
-                //Info.LogException(functionName, exMapPath, "(Error handled by Code)", true);
-                LogFilePath = FilePath;
-            }
-
-            string TextLine;
-
-            if (PrefixWithTimestamp)
-            {
-                TextLine = DateTime.Now + "---" + TextToWrite;
-                //('yyyy-mm-dd-HH:MM:SS') + 
-            }
-            else
-            {
-                TextLine = TextToWrite;
-            }
-
-            if (Overwrite == true | File.Exists(LogFilePath) == false)
-            {
-                FileStream fsNew = Files.CreateFileAndDirectory(LogFilePath);
-                StreamWriter swNew = new StreamWriter(fsNew);
-                swNew.WriteLine(TextLine);
-                swNew.Close();
-                fsNew.Close();
-            }
-            else
-            {
-                StreamWriter swAppend = File.AppendText(LogFilePath);
-                swAppend.WriteLine(TextLine);
-                swAppend.Close();
-            }
-        }
-
-        /// <summary>
-        /// Writes some text to a provided file location.
-        /// </summary>
-        /// <param name="FilePath">Virtual or Physical path - Inlcuding the desired filename with a text-compatible extension (ex: .txt, .xml, etc.)</param>
-        /// <param name="TextContent">Text to write to file</param>
-        /// <returns></returns>
-        public static bool CreateTextFile(string FilePath, string TextContent)
-        {
-            var mappedFilePath = Files.GetMappedPath(FilePath);
-
-            try
-            {
-
-                // WriteAllText creates a file, writes the specified string to the file,
-                // and then closes the file.    You do NOT need to call Flush() or Close().
-                System.IO.File.WriteAllText(mappedFilePath, TextContent);
-            }
-            catch (Exception ex)
-            {
-                //var msg = "";
-                //if (ex.Message.Contains("path's format is not supported"))
-                //{
-                //    var functionName = string.Format("{0}.CreateTextFile", ThisClassName);
-                //    if (mappedFilePath.Contains(":"))
-                //    {msg = "Do you have a colon in the filename?";}
-                //   // Info.LogException(functionName, ex, msg);
-                //}
-            }
-            return true;
         }
 
         public static Size GetJpegDimensions(string filename)
@@ -638,30 +685,45 @@
             return (ushort)(hi | lo);
         }
 
+        #endregion
 
-        //public static bool DisplayFileFromServer(Uri serverUri)
-         //{
-         //    // The serverUri parameter should start with the ftp:// scheme. 
-         //    if (serverUri.Scheme != Uri.UriSchemeFtp)
-         //    {
-         //        return false;
-         //    }
-         //    // Get the object used to communicate with the server.
-         //    WebClient request = new WebClient();
+        #region MapPath
 
-         //    // This example assumes the FTP site uses anonymous logon.
-         //    request.Credentials = new NetworkCredential("anonymous", "janeDoe@contoso.com");
-         //    try
-         //    {
-         //        byte[] newFileData = request.DownloadData(serverUri.ToString());
-         //        string fileString = System.Text.Encoding.UTF8.GetString(newFileData);
-         //        Console.WriteLine(fileString);
-         //    }
-         //    catch (WebException e)
-         //    {
-         //        Console.WriteLine(e.ToString());
-         //    }
-         //    return true;
-         //}
+        public static string UnMapPath(string MappedPath)
+        {
+            string RootMapPath = HttpContext.Current.Server.MapPath("/");
+            string VirtualPath = "";
+
+
+            VirtualPath = MappedPath.ToLower(); //start with the provided MappedPath, standardized to lowercase to make replacing easy.
+            VirtualPath = VirtualPath.Replace(RootMapPath.ToLower(), ""); //Get rid of the portion to the website root
+
+            string BackslashChar = @"\";
+            VirtualPath = VirtualPath.Replace(BackslashChar, "/"); //flip the slashes
+
+            return VirtualPath;
+        }
+
+        public static string GetMappedPath(string MappedOrRelativePath)
+        {
+            string MappedFolderPath = "";
+            try
+            {
+                MappedFolderPath = HttpContext.Current.Server.MapPath(MappedOrRelativePath);
+            }
+            catch (HttpException exMapPath)
+            {
+                //TODO: Update using new code pattern:
+                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+                //var msg = string.Format("");
+                //Info.LogException("Files.GetMappedPath", exMapPath, "(Error handled by Code - Path was already mapped)", true);
+                MappedFolderPath = MappedOrRelativePath;
+            }
+
+            return MappedFolderPath;
+        }
+
+        #endregion
+
     }
 }
