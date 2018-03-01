@@ -372,6 +372,11 @@
 
         #region Create Files/Folders
 
+        /// <summary>
+        /// Will check for the existence of a directory on disk and create it if missing
+        /// </summary>
+        /// <param name="FolderPath">Path to directory</param>
+        /// <returns>TRUE if sucessful</returns>
         public static bool CreateDirectoryIfMissing(string FolderPath)
         {
             bool Success = false;
@@ -401,13 +406,18 @@
             return Success;
         }
 
+        /// <summary>
+        /// Creates an empty file at a location, creating directories as needed
+        /// </summary>
+        /// <param name="FullFilePath">Path for directories and file</param>
+        /// <returns>Filestream for new file</returns>
         public static FileStream CreateFileAndDirectory(string FullFilePath)
         {
-            string DirectoryName = Path.GetDirectoryName(FullFilePath);
+            string directoryName = Path.GetDirectoryName(FullFilePath);
 
-            if (Directory.Exists(DirectoryName) == false)
+            if (Directory.Exists(directoryName) == false)
             {
-                Directory.CreateDirectory(DirectoryName);
+                Directory.CreateDirectory(directoryName);
             }
 
             FileStream fs = File.Create(FullFilePath);
@@ -431,7 +441,7 @@
             {
                 if (CreateDirectoryIfMissing)
                 {
-                    string directoryName = Path.GetDirectoryName(FilePath);
+                    string directoryName = Path.GetDirectoryName(Files.GetMappedPath(FilePath));
 
                     if (Directory.Exists(directoryName) == false)
                     {
@@ -464,6 +474,13 @@
             return true;
         }
 
+        /// <summary>
+        /// Writes text to a file
+        /// </summary>
+        /// <param name="FilePath">Path and filename</param>
+        /// <param name="TextToWrite">Text content to add to file</param>
+        /// <param name="Overwrite">If FALSE will just append as a line to existing file contents, TRUE will overwrite all file contents</param>
+        /// <param name="PrefixWithTimestamp">Add a timestamp to the beginning of the line appended (useful for log files)</param>
         public static void WriteToTextFile(string FilePath, string TextToWrite, bool Overwrite = false, bool PrefixWithTimestamp = true)
         {
             string LogFilePath = "";
@@ -506,7 +523,6 @@
             }
         }
 
-
         #endregion
 
         #region Read Files
@@ -526,64 +542,34 @@
         }
 
         //public static bool DisplayFileFromServer(Uri serverUri)
-            //{
-            //    // The serverUri parameter should start with the ftp:// scheme. 
-            //    if (serverUri.Scheme != Uri.UriSchemeFtp)
-            //    {
-            //        return false;
-            //    }
-            //    // Get the object used to communicate with the server.
-            //    WebClient request = new WebClient();
+        //{
+        //    // The serverUri parameter should start with the ftp:// scheme. 
+        //    if (serverUri.Scheme != Uri.UriSchemeFtp)
+        //    {
+        //        return false;
+        //    }
+        //    // Get the object used to communicate with the server.
+        //    WebClient request = new WebClient();
 
-            //    // This example assumes the FTP site uses anonymous logon.
-            //    request.Credentials = new NetworkCredential("anonymous", "janeDoe@contoso.com");
-            //    try
-            //    {
-            //        byte[] newFileData = request.DownloadData(serverUri.ToString());
-            //        string fileString = System.Text.Encoding.UTF8.GetString(newFileData);
-            //        Console.WriteLine(fileString);
-            //    }
-            //    catch (WebException e)
-            //    {
-            //        Console.WriteLine(e.ToString());
-            //    }
-            //    return true;
-            //}
+        //    // This example assumes the FTP site uses anonymous logon.
+        //    request.Credentials = new NetworkCredential("anonymous", "janeDoe@contoso.com");
+        //    try
+        //    {
+        //        byte[] newFileData = request.DownloadData(serverUri.ToString());
+        //        string fileString = System.Text.Encoding.UTF8.GetString(newFileData);
+        //        Console.WriteLine(fileString);
+        //    }
+        //    catch (WebException e)
+        //    {
+        //        Console.WriteLine(e.ToString());
+        //    }
+        //    return true;
+        //}
 
-            #endregion
+        #endregion
 
-            #region Get File Information
+        #region Get File Information
 
-            private static long GetFileLength(string FtpHostServer, string username, string password, string FtpFilePath, bool usePassive)
-        {
-            string RemoteURL = "ftp://" + FtpHostServer + "/" + FtpFilePath;
-
-            FtpWebRequest requestServerTest = (FtpWebRequest)WebRequest.Create(FtpHostServer);
-            requestServerTest.Credentials = new NetworkCredential(username, password);
-            requestServerTest.Method = WebRequestMethods.Ftp.ListDirectory;
-            FtpWebResponse ServerResponse = (FtpWebResponse)requestServerTest.GetResponse();
-            //TODO: Update using new code pattern:
-            //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-            //var msg = string.Format("");
-            //Info.LogInfo("Files.GetFileLength : Server Test Response=" + ServerResponse.ToString());
-
-
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(RemoteURL);
-            //TODO: Update using new code pattern:
-            //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-            //var msg = string.Format("");
-            //Info.LogInfo("Files.GetFileLength : RequestUri=" + request.RequestUri);
-            request.KeepAlive = false;
-            request.UsePassive = usePassive;
-            request.Credentials = new NetworkCredential(username, password);
-            request.Method = WebRequestMethods.Ftp.GetFileSize;
-
-            FtpWebResponse lengthResponse = (FtpWebResponse)request.GetResponse();
-            long length = lengthResponse.ContentLength;
-            lengthResponse.Close();
-            return length;
-
-        }
 
         /// <summary>
         /// Convert bytes into a friendlier format
@@ -675,6 +661,37 @@
                 if (rdr != null) rdr.Close();
                 if (stream != null) stream.Close();
             }
+        }
+
+        private static long GetFileLength(string FtpHostServer, string username, string password, string FtpFilePath, bool usePassive)
+        {
+            string RemoteURL = "ftp://" + FtpHostServer + "/" + FtpFilePath;
+
+            FtpWebRequest requestServerTest = (FtpWebRequest)WebRequest.Create(FtpHostServer);
+            requestServerTest.Credentials = new NetworkCredential(username, password);
+            requestServerTest.Method = WebRequestMethods.Ftp.ListDirectory;
+            FtpWebResponse ServerResponse = (FtpWebResponse)requestServerTest.GetResponse();
+            //TODO: Update using new code pattern:
+            //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+            //var msg = string.Format("");
+            //Info.LogInfo("Files.GetFileLength : Server Test Response=" + ServerResponse.ToString());
+
+
+            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(RemoteURL);
+            //TODO: Update using new code pattern:
+            //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+            //var msg = string.Format("");
+            //Info.LogInfo("Files.GetFileLength : RequestUri=" + request.RequestUri);
+            request.KeepAlive = false;
+            request.UsePassive = usePassive;
+            request.Credentials = new NetworkCredential(username, password);
+            request.Method = WebRequestMethods.Ftp.GetFileSize;
+
+            FtpWebResponse lengthResponse = (FtpWebResponse)request.GetResponse();
+            long length = lengthResponse.ContentLength;
+            lengthResponse.Close();
+            return length;
+
         }
 
         private static ushort ReadBEUshort(BinaryReader rdr)

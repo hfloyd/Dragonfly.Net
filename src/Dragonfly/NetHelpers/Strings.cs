@@ -10,6 +10,9 @@
     using System.Web;
     using HtmlAgilityPack;
 
+    /// <summary>
+    /// Helpers dealing with text strings
+    /// </summary>
     [Serializable]
     public static class Strings
     {
