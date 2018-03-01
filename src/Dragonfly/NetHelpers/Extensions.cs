@@ -18,7 +18,7 @@
         #region ======= IEnumerable<T> 
 
         /// <summary>
-        /// Find the index of an item in the IEnumerable collection similar to List<T>.FindIndex()
+        /// Find the index of an item in the IEnumerable collection similar to List&lt;T&gt;.FindIndex()
         /// </summary>
         /// <param name="finder">The Item to locate</param>
         /// <returns>Integer representing the Index position</returns>

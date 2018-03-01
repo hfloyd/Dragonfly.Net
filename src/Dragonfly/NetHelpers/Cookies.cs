@@ -255,7 +255,7 @@
         /// <summary>
         /// Persists a CookieContainer to File storage
         /// </summary>
-        /// <param name="FilePathName">Path & filename for cookie storage</param>
+        /// <param name="FilePathName">Path &amp; filename for cookie storage</param>
         /// <param name="CookieJar">CookieContainer to Serialize</param>
         public static void WriteCookiesToDisk(string FilePathName, CookieContainer CookieJar)
         {

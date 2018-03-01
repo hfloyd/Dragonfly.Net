@@ -657,7 +657,7 @@
 
         /// <summary>
         /// Similar to String.Join(), but allows for 2 different separators in order to provide a natural text representation of a list 
-        /// (Example: 'A, B, and C' uses ', ' & ' and ' as the two separators.)
+        /// (Example: 'A, B, and C' uses ', ' &amp; ' and ' as the two separators.)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="Separator">First separator (ex: ', ')</param>
