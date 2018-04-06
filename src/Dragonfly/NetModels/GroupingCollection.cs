@@ -6,24 +6,25 @@ using System.Linq;
 
 namespace Dragonfly.NetModels
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class GroupingCollection<T> : IEnumerable<T>
     {
         private const string ThisClassName = "Dragonfly.NetModels.GroupingCollection<T>";
 
-        #region fields
-
-        //private const int DefaultPageSize = 10;
-
-        private readonly IEnumerable<T> _collection;
-
-        //private int _pageSize = DefaultPageSize;
-
-        private IEnumerable<Group<T>> _groups;
-
-
-        #endregion
-
         #region properties
+
+        /// <summary>
+        /// Original collection of elements
+        /// </summary>
+        public IEnumerable<T> InitialCollection { get; set; }
+
+        /// <summary>
+        /// Grouped collection of elements - if Grouping has been performed
+        /// </summary>
+        public IEnumerable<Group<T>> Groups { get; set; }
 
         /// <summary>
         /// Gets groups count
@@ -32,22 +33,28 @@ namespace Dragonfly.NetModels
         {
             get
             {
-                //return (int)Math.Ceiling(this._collection.Count() / (decimal)this.PageSize);
                 return this.Groups.Count();
             }
         }
 
-        public IEnumerable<Group<T>> Groups
-        {
-            get { return this._groups; }
-        }
+        //public IEnumerable<Group<T>> Groups
+        //{
+        //    get { return this.GroupedCollection; }
+        //}
 
         #endregion
 
         #region ctor
 
         /// <summary>
-        /// Creates collection 
+        /// Emptry Constructor to allow for Serialization/Deserialization
+        /// </summary>
+        public GroupingCollection()
+        {
+        }
+
+        /// <summary>
+        /// Creates initial collection - YOU MUST CALL THE "GroupItems" METHOD IN ORDER TO GROUP
         /// </summary>
         public GroupingCollection(IEnumerable<T> InitialCollection)
         {
@@ -56,7 +63,7 @@ namespace Dragonfly.NetModels
                 throw new ArgumentNullException("InitialCollection");
             }
 
-            this._collection = InitialCollection.ToArray();
+            this.InitialCollection = InitialCollection; //.ToArray();
         }
 
         #endregion
@@ -64,13 +71,13 @@ namespace Dragonfly.NetModels
         #region Methods
 
         /// <summary>
-        /// Groups Items in initial collection by provided predicate
+        /// Groups Items in initial collection by provided predicate (replaces current grouping)
         /// </summary>
         /// <typeparam name="TKey"></typeparam>
         /// <param name="GroupingProperty"></param>
         public void GroupItems<TKey>(Func<T, TKey> GroupingProperty)
         {
-            var query = (from item in this._collection select item).GroupBy(GroupingProperty);
+            var query = (from item in this.InitialCollection select item).GroupBy(GroupingProperty);
 
             var groups = new List<Group<T>>();
 
@@ -101,7 +108,7 @@ namespace Dragonfly.NetModels
                 groups.Add(thisGroup);
             }
 
-            _groups = groups;
+            Groups = groups;
         }
 
         /// <summary>
@@ -113,7 +120,7 @@ namespace Dragonfly.NetModels
             //{
             //    this.GroupItems(GroupingProperty);
             //}
-            var returnGroup = _groups.Where(g => g.GroupName.Values.Contains(GroupValue)).FirstOrDefault();
+            var returnGroup = Groups.Where(g => g.GroupName.Values.Contains(GroupValue)).FirstOrDefault();
 
             return returnGroup;
         }
@@ -121,7 +128,7 @@ namespace Dragonfly.NetModels
         public int GetGroupIndex(Group<T> group)
         {
 
-            return this._groups.ToList().FindIndex(g => g == group);
+            return this.Groups.ToList().FindIndex(g => g == group);
 
         }
 
@@ -130,11 +137,11 @@ namespace Dragonfly.NetModels
         #region IEnumerable<T> Members
 
         /// <summary>
-        /// Returns an enumerator that iterates through collection
+        /// Returns an enumerator that iterates through initial collection
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            return this._collection.GetEnumerator();
+            return this.InitialCollection.GetEnumerator();
         }
 
         #endregion
@@ -153,34 +160,19 @@ namespace Dragonfly.NetModels
     }
 
 
-
-    //    #region public methods
-
-    //    /// <summary>
-    //    /// Returns data by page number
-    //    /// </summary>
-    //    public IEnumerable<T> GetData(int pageNumber)
-    //    {
-    //        if (pageNumber < 0 || pageNumber > this.PagesCount)
-    //        {
-    //            return new T[] { };
-    //        }
-
-    //        int offset = (pageNumber - 1) * this.PageSize;
-
-    //        return this._collection.Skip(offset).Take(this.PageSize);
-    //    }
-
-
+    /// <summary>
+    /// Collection of Grouped elements
+    /// </summary>
+    /// <typeparam name="T">Type of elements in collection</typeparam>
     public class Group<T>
     {
         //public int GroupIndex { get; set; }
 
         //public string GroupKey { get; set; }
 
-        public IDictionary<string, object> GroupName { get; internal set; }
+        public IDictionary<string, object> GroupName { get; set; }
 
-        public IEnumerable<T> Collection { get; internal set; }
+        public IEnumerable<T> Collection { get; set; }
     }
 
     internal static class ObjectExtensions
