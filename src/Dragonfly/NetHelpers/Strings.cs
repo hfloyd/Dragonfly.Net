@@ -704,6 +704,24 @@
 
         }
 
+        /// <summary>
+        /// Truncates a long string to a maximum length without leaving a partial word at the end.
+        /// </summary>
+        /// <param name="OriginalString">Long string</param>
+        /// <param name="MaxLength">Maximum desired length after truncation and Suffix</param>
+        /// <param name="Suffix">Appended to end of truncated string (default = ellipse character)</param>
+        /// <returns>Truncated string with suffix</returns>
+        public static string TruncateAtWord(this string OriginalString, int MaxLength, string Suffix = "…")
+        {
+            var length = MaxLength - Suffix.Length;
+
+            if (OriginalString == null || OriginalString.Length <= MaxLength)
+                return OriginalString;
+
+            int iNextSpace = OriginalString.LastIndexOf(" ", length, StringComparison.Ordinal);
+            var shortString = OriginalString.Substring(0, (iNextSpace > 0) ? iNextSpace : length).Trim();
+            return string.Format("{0}{1}", shortString, Suffix);
+        }
         #endregion
 
         #region Misc
