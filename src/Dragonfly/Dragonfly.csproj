@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.8.0</Version>
-    <AssemblyVersion>1.8.0.0</AssemblyVersion>
-    <FileVersion>1.8.0.0</FileVersion>
-    <PackageReleaseNotes>Added new string extension "TruncateAtWord"</PackageReleaseNotes>
+    <Version>1.9.2</Version>
+    <AssemblyVersion>1.9.2.0</AssemblyVersion>
+    <FileVersion>1.9.2.0</FileVersion>
+    <PackageReleaseNotes>Added additional properties to PagingCollection</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>
@@ -39,6 +39,6 @@
   <Import Project="..\Custom.targets" />
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="REM if $(ConfigurationName) == Debug (XCOPY /y &quot;$(TargetDir)$(TargetName).*&quot; &quot;C:\Users\Heather\NAS Folders\Active Projects\Webs\Clients\FOOD\PerdueFS-2018\sourcecode\PerdueFS.Web\bin&quot;)" />
+    <Exec Command="if $(ConfigurationName) == Debug (XCOPY /y &quot;$(TargetDir)$(TargetName).*&quot; &quot;C:\Users\Heather\NAS Folders\Active Projects\Webs\Clients\SPRT\Sprott-v6\sourcecode\Sprott-V6\bin&quot;)&#xD;&#xA;if $(ConfigurationName) == Debug (XCOPY /y &quot;$(TargetDir)$(TargetName).*&quot; &quot;C:\Users\Heather\NAS Folders\Active Projects\Webs\Clients\SPRT\Sprott-v6\sourcecode\Sprott.Core\bin&quot;)" />
   </Target>
 </Project>

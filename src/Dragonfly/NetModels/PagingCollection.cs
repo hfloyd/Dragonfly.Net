@@ -77,15 +77,44 @@
             this.PageSize = pageSize;
             this._collection = collection.ToArray();
 
+            //divide results into pages
+            var totalItems = collection.Count();
+            //var numPages = totalResults % pageLength == 0 ? totalResults / pageLength : totalResults / pageLength + 1;
             var pagesList = new List<CollectionPage<T>>();
-            for (int i = 1; i <= this.PagesCount; i++)
+            if (pageSize > 0)
             {
-                var newPage = new CollectionPage<T>();
-                newPage.PageNumber = i;
-                newPage.Collection = this.GetData(i);
+                var toSkip = 0;
+                for (int i = 0; i < this.PagesCount; i++)
+                {
+                    var page = new CollectionPage<T>();
 
-                pagesList.Add(newPage);
+                    page.PageNumber = i + 1;
+                    toSkip = i * pageSize;
+                    page.Collection = this.GetData(i);
+                    page.ResultsOnPage = page.Collection.Count();
+                    page.FirstResult = toSkip + 1;
+
+                    var lastResult = toSkip + pageSize;
+                    if (lastResult > totalItems)
+                    {
+                        lastResult = totalItems;
+                    }
+
+                    page.LastResult = lastResult;
+
+                    pagesList.Add(page);
+                }
             }
+
+
+            //for (int i = 1; i <= this.PagesCount; i++)
+            //{
+            //    var newPage = new CollectionPage<T>();
+            //    newPage.PageNumber = i;
+            //    newPage.Collection = this.GetData(i);
+
+            //    pagesList.Add(newPage);
+            //}
 
             this._pages = pagesList;
         }
@@ -175,7 +204,9 @@
     public class CollectionPage<T>
     {
         public int PageNumber { get; set; }
-
+        public int ResultsOnPage { get; set; }
+        public int FirstResult { get; set; }
+        public int LastResult { get; set; }
         public IEnumerable<T> Collection;
     }
 }
