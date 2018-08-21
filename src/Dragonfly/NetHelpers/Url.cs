@@ -302,7 +302,7 @@
             allQs = allQs.Replace("&&", "");
 
             //Build New Url
-            var newUrl = string.Format("{0}?{1}{2}", baseUrl, allQs, newAnchor);
+            var newUrl = string.Format("{0}?{1}{2}", basePath, allQs, newAnchor);
             newUrl = newUrl.Replace("?&", "?"); //Cleanup if all QS have been removed
             //uri.Rewrite(newUrl);
 
