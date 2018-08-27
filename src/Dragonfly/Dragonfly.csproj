@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.10.0</Version>
-    <AssemblyVersion>1.10.0.0</AssemblyVersion>
-    <FileVersion>1.10.0.0</FileVersion>
-    <PackageReleaseNotes>Fixed bug in Url.AppendQueryStringToUrl()</PackageReleaseNotes>
+    <Version>1.10.1</Version>
+    <AssemblyVersion>1.10.1.0</AssemblyVersion>
+    <FileVersion>1.10.1.0</FileVersion>
+    <PackageReleaseNotes>Added 'ObjectId' and 'ObjectGuid' properties to StatusMessage model</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>

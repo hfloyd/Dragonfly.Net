@@ -36,6 +36,16 @@
         public string ObjectName { get; set; }
 
         /// <summary>
+        /// Int Id of the Object that this status message refers to
+        /// </summary>
+        public int ObjectId { get; set; }
+
+        /// <summary>
+        /// Guid of the Object that this status message refers to
+        /// </summary>
+        public string ObjectGuid { get; set; }
+
+        /// <summary>
         /// Returns TRUE if there is content in the 'Message' property
         /// </summary>
         public bool HasMessage
