@@ -8,8 +8,10 @@ namespace Dragonfly.NetHelpers
 {
     using System.IO;
     using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
 
-    class Http
+    public static class Http
     {
         /// <summary>
         /// Method to simplify calling an external url.  Any results from the url will be saved as a string that can
@@ -70,6 +72,31 @@ namespace Dragonfly.NetHelpers
         public static string CallUrl(string Url)
         {
             return CallUrl(Url, "GET");
+        }
+
+        /// <summary>
+        /// Takes a StringBuilder object and converts it to a file for instant download
+        /// </summary>
+        /// <param name="StringData">String Builder object to download</param>
+        /// <param name="OutputFileName">Filename for downloaded file (default = "Export.csv")</param>
+        /// <param name="MediaType">MIME Type for file (default = "text/csv")</param>
+        /// <returns></returns>
+        public static HttpResponseMessage StringBuilderToFile(StringBuilder StringData, string OutputFileName = "Export.csv", string MediaType = "text/csv")
+        {
+            //TODO: Need to figure out why » is returning as Â (likely an issue with unicode in general...?)
+
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(StringData.ToString());
+            writer.Flush();
+            stream.Position = 0;
+
+            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+            result.Content = new StreamContent(stream);
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaType);
+            result.Content.Headers.ContentDisposition =
+                new ContentDispositionHeaderValue("attachment") { FileName = OutputFileName };
+            return result;
         }
     }
 }
