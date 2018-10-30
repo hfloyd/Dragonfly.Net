@@ -570,6 +570,30 @@
 
         #region Get File Information
 
+        public static bool FileExists(string FullFilePath)
+        {
+            string mappedFilePath = "";
+            try
+            {
+                mappedFilePath = HttpContext.Current.Server.MapPath(FullFilePath);
+            }
+            catch (System.Web.HttpException exMapPath)
+            {
+                var functionName = string.Format("{0}.FileExists", ThisClassName);
+                //Info.LogException(functionName, exMapPath, "(Error handled by Code)", true);
+                mappedFilePath = FullFilePath;
+            }
+
+            if (File.Exists(mappedFilePath))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
 
         /// <summary>
         /// Convert bytes into a friendlier format
