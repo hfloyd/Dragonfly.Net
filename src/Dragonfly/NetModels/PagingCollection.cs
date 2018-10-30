@@ -83,14 +83,13 @@
             var pagesList = new List<CollectionPage<T>>();
             if (pageSize > 0)
             {
-                var toSkip = 0;
                 for (int i = 0; i < this.PagesCount; i++)
                 {
                     var page = new CollectionPage<T>();
+                    var toSkip = i * pageSize;
 
                     page.PageNumber = i + 1;
-                    toSkip = i * pageSize;
-                    page.Collection = this.GetData(i);
+                    page.Collection = this.GetData(page.PageNumber);
                     page.ResultsOnPage = page.Collection.Count();
                     page.FirstResult = toSkip + 1;
 
