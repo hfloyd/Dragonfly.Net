@@ -310,6 +310,87 @@
         }
 
         /// <summary>
+        /// Updates a URL removing a specific query string value 
+        /// </summary>
+        /// <param name="OriginalUrl">Url to edit</param>
+        /// <param name="QsKeyToRemove">Query String Key name to remove, if present</param>
+        /// <returns>URL</returns>
+        public static string RemoveQueryStringKeyFromUrl(string OriginalUrl, string QsKeyToRemove)
+        {
+            var url = new Uri(OriginalUrl);
+            return RemoveQueryStringKeyFromUrl(url, QsKeyToRemove);
+        }
+
+        /// <summary>
+        /// Updates a URL removing a specific query string value
+        /// </summary>
+        /// <param name="OriginalUri">Uri to edit</param>
+        /// <param name="QsKeyToRemove">Query String Key name to remove, if present</param>
+        /// <returns>URL</returns>
+        public static string RemoveQueryStringKeyFromUrl(Uri OriginalUri, string QsKeyToRemove)
+        {
+            var uri = OriginalUri;
+
+            var baseUrl = uri.AbsoluteUri;
+            var basePath = uri.AbsolutePath;
+
+            //Anchor Tag
+            var currAnchor = uri.Fragment.Replace("#", "");
+            //var providedAnchor = NewAnchor.Replace("#", "");
+            var newAnchor = "";
+
+            if (currAnchor != "")
+            {
+                //    if (NewAnchor != "")
+                //    {
+                //        newAnchor = providedAnchor;
+                //    }
+                //    else
+                //    {
+                newAnchor = currAnchor;
+                //}
+
+                newAnchor = "#" + newAnchor;
+            }
+            //else
+            //{
+            //newAnchor = providedAnchor;
+            //}
+
+            //Query String Values
+            var qs = GetQueryStringDictionary(uri.Query);
+            if (qs.ContainsKey(QsKeyToRemove))
+            {
+                qs.Remove(QsKeyToRemove);
+            }
+
+            var allQs = AssembleQueryString(qs);
+
+            //Build New Url
+            var newUrl = string.Format("{0}?{1}{2}", basePath, allQs, newAnchor);
+            newUrl = newUrl.Replace("?&", "?"); //Cleanup if all QS have been removed
+
+            return newUrl;
+        }
+
+        public static string AssembleQueryString(Dictionary<string, string> QueryStringDictionary)
+        {
+            var allQs = "&";
+            foreach (var qs in QueryStringDictionary)
+            {
+                if (qs.Value != "")
+                {
+                    //add qs with value
+                    allQs = string.Format("{0}&{1}={2}", allQs, qs.Key, qs.Value);
+                }
+            }
+            allQs = allQs.Replace("&&", "");
+
+            return allQs;
+        }
+
+
+        /// <summary>
         /// Rewrites the path of uri.
         /// </summary>
         /// <param name="uri">The uri.</param>
