@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.12.1</Version>
-    <AssemblyVersion>1.12.1.0</AssemblyVersion>
-    <FileVersion>1.12.1.0</FileVersion>
-    <PackageReleaseNotes>Addition of Url.RemoveQueryStringKeyFromUrl() function.</PackageReleaseNotes>
+    <Version>1.12.2</Version>
+    <AssemblyVersion>1.12.2.0</AssemblyVersion>
+    <FileVersion>1.12.2.0</FileVersion>
+    <PackageReleaseNotes>Addition of Strings.ConvertStringToKvPair() and Strings.ParseStringToKvPairs() functions.</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>

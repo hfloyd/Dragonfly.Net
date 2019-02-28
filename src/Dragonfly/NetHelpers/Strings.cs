@@ -725,11 +725,6 @@
         #endregion
 
         #region Misc
-        public static List<string> ConvertToList(this string DelimitedString, char Separator)
-        {
-            List<string> MyList = new List<string>(DelimitedString.Split(Separator));
-            return MyList;
-        }
 
         /// <summary>
         /// Count occurrences of a string inside another string.
@@ -747,6 +742,28 @@
             return count;
         }
 
+        #endregion
+
+        #region Converting between String and Objects
+
+        /// <summary>
+        /// Splits a string into a List of strings
+        /// </summary>
+        /// <param name="DelimitedString"></param>
+        /// <param name="Separator"></param>
+        /// <returns></returns>
+        public static List<string> ConvertToList(this string DelimitedString, char Separator)
+        {
+            List<string> myList = new List<string>(DelimitedString.Split(Separator));
+            return myList;
+        }
+
+        /// <summary>
+        /// Converts an array of strings, each separated with the provided character, into a Dictionary 
+        /// </summary>
+        /// <param name="StringArray"></param>
+        /// <param name="Separator">Character used to separate values in each item, default is an equal sign (=)</param>
+        /// <returns></returns>
         public static Dictionary<string, string> ConvertToDictionary(this string[] StringArray, char Separator = '=')
         {
             var dictionary = new Dictionary<string, string>();
@@ -761,6 +778,12 @@
             return dictionary;
         }
 
+        /// <summary>
+        /// Converts a Dictionary into an array of strings, each separated with the provided character
+        /// </summary>
+        /// <param name="Dictionary"></param>
+        /// <param name="Separator">Character to separate values in each dictionary item, default is an equal sign (=)</param>
+        /// <returns></returns>
         public static string[] ConvertToStringArray(this Dictionary<string, string> Dictionary, char Separator = '=')
         {
             var num = Dictionary.Count;
@@ -778,19 +801,101 @@
             return items;
         }
 
-        public static string ConvertToSeparatedString(this List<string> ListOfStrings, string Separator)
+        /// <summary>
+        /// Takes a collection of string and turns them into a single string using the provided separator
+        /// </summary>
+        /// <param name="ListOfStrings"></param>
+        /// <param name="Separator"></param>
+        /// <returns></returns>
+        public static string ConvertToSeparatedString(this IEnumerable<string> ListOfStrings, string Separator)
         {
-            string MyString = Separator;
+            string myString = Separator;
 
-            foreach (var ListItem in ListOfStrings)
+            foreach (var listItem in ListOfStrings)
             {
-                MyString += Separator + ListItem;
+                myString += Separator + listItem;
             }
 
-            MyString = MyString.Replace(String.Concat(Separator, Separator), "");
+            myString = myString.Replace(String.Concat(Separator, Separator), "");
 
-            return MyString;
+            return myString;
         }
+
+        /// <summary>
+        /// Converts a string in the format "a=b" into a KeyValuePair
+        /// </summary>
+        /// <param name="SingleKvString">String in the format "a=b"</param>
+        /// <returns>A single KeyValuePair object</returns>
+        public static KeyValuePair<string, string> ConvertStringToKvPair(string SingleKvString)
+        {
+            if (SingleKvString.Contains("="))
+            {
+                var splitKV = SingleKvString.Split('=');
+                var kvp = new KeyValuePair<string, string>(splitKV[0], splitKV[1]);
+                return kvp;
+            }
+            else
+            {
+                //invalid data, return empty KVP
+                var kvp = new KeyValuePair<string, string>();
+                return kvp;
+            }
+        }
+
+        /// <summary>
+        /// Converts a string in the format "a=b,x=y" or "a=b&x=y" or "a=b|x=y" into an IEnum of KeyValuePairs
+        /// </summary>
+        /// <param name="KvString">String in the format "a=b,x=y" or "a=b&x=y" or "a=b|x=y"</param>
+        /// <returns>Parsed KeyValuePair objects</returns>
+        public static IEnumerable<KeyValuePair<string, string>> ParseStringToKvPairs(string KvString)
+        {
+            var kvPairs = new List<KeyValuePair<string, string>>();
+
+            var countPairs = KvString.CountStringOccurrences("=");
+
+            if (countPairs == 1)
+            {
+                //Single pair
+                var kvp = ConvertStringToKvPair(KvString);
+                kvPairs.Add(kvp);
+            }
+            else if (countPairs > 1)
+            {
+                if (KvString.Contains("&"))
+                {
+                    var splitPairs = KvString.Split('&');
+
+                    foreach (var pair in splitPairs)
+                    {
+                        var kvp = ConvertStringToKvPair(pair);
+                        kvPairs.Add(kvp);
+                    }
+                }
+                else if (KvString.Contains(","))
+                {
+                    var splitPairs = KvString.Split(',');
+
+                    foreach (var pair in splitPairs)
+                    {
+                        var kvp = ConvertStringToKvPair(pair);
+                        kvPairs.Add(kvp);
+                    }
+                }
+                else if (KvString.Contains("|"))
+                {
+                    var splitPairs = KvString.Split('|');
+
+                    foreach (var pair in splitPairs)
+                    {
+                        var kvp = ConvertStringToKvPair(pair);
+                        kvPairs.Add(kvp);
+                    }
+                }
+            }
+
+            return kvPairs;
+        }
+        
         #endregion
 
     }
