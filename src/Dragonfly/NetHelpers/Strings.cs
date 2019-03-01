@@ -2,9 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
-    using System.Net;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Web;
@@ -417,14 +415,14 @@
         }
 
         /// <summary>
-        /// Add an absolute path to all the img tags in the html of an e-mail.
+        /// Add an absolute path to all the img tags in the html of a passed-in string.
         /// </summary>
         /// <param name="html"></param>
         /// <returns></returns>
-        public static string AddImgAbsolutePath(this string html)
+        public static string AddImgAbsolutePath(this string HtmlString)
         {
             HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(html);
+            doc.LoadHtml(HtmlString);
 
             var uri = new Uri(HttpContext.Current.Request.Url.AbsoluteUri);
             var domainUrl = string.Format("{0}://{1}", uri.Scheme, uri.Authority);
@@ -442,6 +440,39 @@
             }
 
             return doc.DocumentNode.InnerHtml;
+        }
+
+        /// <summary>
+        /// Searches for Urls in a string and replaces them with full a href tags
+        /// </summary>
+        /// <param name="HtmlString">String to search and replace in</param>
+        /// <param name="Target">Target for links (default = '_blank' (new window))</param>
+        /// <returns></returns>
+        public static string EnableHtmlLinks(this string HtmlString, string Target="_blank")
+        {
+            var fixedHtml = HtmlString;
+
+            var urlRegEx = @"(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])";
+            //*var urlRegEx = @"(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+";
+            //var urlRegEx = @"/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?";
+            //var urlRegEx = @"/(ftp:\/\/|www\.|https?:\/\/){1}[a-zA-Z0-9u00a1-\uffff0-]{2,}\.[a-zA-Z0-9u00a1-\uffff0-]{2,}(\S*)";
+            //var urlRegEx = @"/[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?";
+            //var urlRegEx = @"/([--:\w?@%&+~#=]*\.[a-z]{2,4}\/{0,2})((?:[?&](?:\w+)=(?:\w+))+|[--:\w?@%&+~#=]+)?/g";
+
+            var matches = Regex.Matches(HtmlString, urlRegEx, RegexOptions.IgnoreCase);
+
+            if (matches.Count > 0)
+            {
+                foreach (var match in matches)
+                {
+                    var matchUrl = match.ToString();
+                    var linkHtml = $"<a href=\"{matchUrl}\" target=\"{Target}\">{matchUrl}</a>";
+                    fixedHtml = fixedHtml.Replace(matchUrl, linkHtml);
+                }
+
+            }
+
+            return fixedHtml;
         }
 
         public static string MakeCamelCase(this string Original)
@@ -895,7 +926,7 @@
 
             return kvPairs;
         }
-        
+
         #endregion
 
     }
