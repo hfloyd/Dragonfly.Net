@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.12.2</Version>
-    <AssemblyVersion>1.12.2.0</AssemblyVersion>
-    <FileVersion>1.12.2.0</FileVersion>
-    <PackageReleaseNotes>Addition of Strings.ConvertStringToKvPair() and Strings.ParseStringToKvPairs() functions.</PackageReleaseNotes>
+    <Version>1.12.3</Version>
+    <AssemblyVersion>1.12.3.0</AssemblyVersion>
+    <FileVersion>1.12.3.0</FileVersion>
+    <PackageReleaseNotes>Added Strings.EnableHtmlLinks() extension</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>
