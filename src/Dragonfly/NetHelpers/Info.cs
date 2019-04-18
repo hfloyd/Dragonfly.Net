@@ -54,7 +54,7 @@
         /// <param name="AppKeyName">AppKey from Web.config to lookup</param>
         /// <param name="FailSilently">If the Key is not found and FailSilently is true, FALSE will be returned, otherwise an exception will be raised. </param>
         /// <returns></returns>
-        public bool WebConfigValueAsBool(string AppKeyName, bool FailSilently = true)
+        public static bool WebConfigValueAsBool(string AppKeyName, bool FailSilently = true)
         {
             var stringKey = WebConfigValue(AppKeyName, FailSilently);
 
