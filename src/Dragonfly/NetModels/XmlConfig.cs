@@ -1,8 +1,9 @@
-﻿namespace Dragonfly.NetHelpers
+﻿namespace Dragonfly.NetModels
 {
     using System;
     using System.Collections.Generic;
     using System.Xml;
+    using Dragonfly.NetHelpers;
 
     /// <summary>
     /// The class which represents a configuration xml file

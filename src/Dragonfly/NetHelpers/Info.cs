@@ -48,6 +48,39 @@
             return KeyValue;
         }
 
+        /// <summary>
+        /// Checks a web.config value for common boolean strings and returns true or false
+        /// </summary>
+        /// <param name="AppKeyName">AppKey from Web.config to lookup</param>
+        /// <param name="FailSilently">If the Key is not found and FailSilently is true, FALSE will be returned, otherwise an exception will be raised. </param>
+        /// <returns></returns>
+        public bool WebConfigValueAsBool(string AppKeyName, bool FailSilently = true)
+        {
+            var stringKey = WebConfigValue(AppKeyName, FailSilently);
+
+            if (stringKey == "")
+            {
+                return false;
+            }
+            else
+            {
+                switch (stringKey.ToLower())
+                {
+                    case "true":
+                        return true;
+                    case "false":
+                        return false;
+                    case "1":
+                        return true;
+                    case "0":
+                        return false;
+                    default:
+                        return false;
+                }
+            }
+
+        }
+
         public static string GetConnectionStringFromConfig(string ConnectionStringName)
         {
             string RetrievedConnString = "";
