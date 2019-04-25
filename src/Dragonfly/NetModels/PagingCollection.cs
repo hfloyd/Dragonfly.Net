@@ -5,6 +5,10 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    /// <summary>
+    /// A Model which can be used to group a list of any object type into Pages of a certain size
+    /// </summary>
+    /// <typeparam name="T">Object Model</typeparam>
     public class PagingCollection<T> : IEnumerable<T>
     {
         private const string ThisClassName = "Dragonfly.NetModels.PagingCollection<T>";
@@ -39,6 +43,7 @@
                     throw new ArgumentException();
                 }
                 this._pageSize = value;
+                UpdatePages();
             }
         }
 
@@ -53,6 +58,9 @@
             }
         }
 
+        /// <summary>
+        /// Get All Pages
+        /// </summary>
         public IEnumerable<CollectionPage<T>> Pages
         {
             get
@@ -68,62 +76,31 @@
         /// <summary>
         /// Creates paging collection and sets page size
         /// </summary>
-        public PagingCollection(IEnumerable<T> collection, int pageSize)
+        public PagingCollection(IEnumerable<T> Collection, int PageSize)
         {
-            if (collection == null)
+            if (Collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException("Collection");
             }
-            this.PageSize = pageSize;
-            this._collection = collection.ToArray();
+            this._pageSize = PageSize;
+            this._collection = Collection.ToArray();
+            UpdatePages();
 
-            //divide results into pages
-            var totalItems = collection.Count();
-            //var numPages = totalResults % pageLength == 0 ? totalResults / pageLength : totalResults / pageLength + 1;
-            var pagesList = new List<CollectionPage<T>>();
-            if (pageSize > 0)
-            {
-                for (int i = 0; i < this.PagesCount; i++)
-                {
-                    var page = new CollectionPage<T>();
-                    var toSkip = i * pageSize;
-
-                    page.PageNumber = i + 1;
-                    page.Collection = this.GetData(page.PageNumber);
-                    page.ResultsOnPage = page.Collection.Count();
-                    page.FirstResult = toSkip + 1;
-
-                    var lastResult = toSkip + pageSize;
-                    if (lastResult > totalItems)
-                    {
-                        lastResult = totalItems;
-                    }
-
-                    page.LastResult = lastResult;
-
-                    pagesList.Add(page);
-                }
-            }
-
-
-            //for (int i = 1; i <= this.PagesCount; i++)
-            //{
-            //    var newPage = new CollectionPage<T>();
-            //    newPage.PageNumber = i;
-            //    newPage.Collection = this.GetData(i);
-
-            //    pagesList.Add(newPage);
-            //}
-
-            this._pages = pagesList;
         }
 
         /// <summary>
         /// Creates paging collection
         /// </summary>
-        public PagingCollection(IEnumerable<T> collection)
-            : this(collection, DefaultPageSize)
+        public PagingCollection(IEnumerable<T> Collection)
+            : this(Collection, DefaultPageSize)
         {
+            if (Collection == null)
+            {
+                throw new ArgumentNullException("Collection");
+            }
+            this._pageSize = DefaultPageSize;
+            this._collection = Collection.ToArray();
+            UpdatePages();
         }
 
         #endregion
@@ -197,6 +174,51 @@
             return this.GetEnumerator();
         }
 
+        #endregion
+
+        #region private functions
+
+        private void UpdatePages()
+        {
+            //divide results into pages
+            var totalItems = this._collection.Count();
+            //var numPages = totalResults % pageLength == 0 ? totalResults / pageLength : totalResults / pageLength + 1;
+            var pagesList = new List<CollectionPage<T>>();
+            if (this._pageSize > 0)
+            {
+                for (int i = 0; i < this.PagesCount; i++)
+                {
+                    var page = new CollectionPage<T>();
+                    var toSkip = i * this._pageSize;
+
+                    page.PageNumber = i + 1;
+                    page.Collection = this.GetData(page.PageNumber);
+                    page.ResultsOnPage = page.Collection.Count();
+                    page.FirstResult = toSkip + 1;
+
+                    var lastResult = toSkip + this._pageSize;
+                    if (lastResult > totalItems)
+                    {
+                        lastResult = totalItems;
+                    }
+
+                    page.LastResult = lastResult;
+
+                    pagesList.Add(page);
+                }
+            }
+            
+            //for (int i = 1; i <= this.PagesCount; i++)
+            //{
+            //    var newPage = new CollectionPage<T>();
+            //    newPage.PageNumber = i;
+            //    newPage.Collection = this.GetData(i);
+
+            //    pagesList.Add(newPage);
+            //}
+
+            this._pages = pagesList;
+        }
         #endregion
     }
 
