@@ -1,7 +1,11 @@
 ﻿namespace Dragonfly.NetModels
 {
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Text;
 
     /// <summary>
     /// Object used for collecting and reporting information about code operations.
@@ -85,6 +89,10 @@
         /// </summary>
         public List<StatusMessage> InnerStatuses { get; set; }
         
+        /// <summary>
+        /// Object which can be appended for additional information
+        /// </summary>
+        public object RelatedObject { get; set; }
         #endregion
 
 
@@ -137,7 +145,10 @@
         #endregion
 
         #region Methods
-
+        /// <summary>
+        /// Duration between TimestampStart and TimestampEnd
+        /// </summary>
+        /// <returns></returns>
         public TimeSpan? TimeDuration()
         {
             if (TimestampEnd != null)
@@ -149,6 +160,52 @@
             {
                 return null;
             }
+        }
+        /// <summary>
+        /// Converts StatusMessage into a HttpResponseMessage to return via a WebApi call, for instance.
+        /// </summary>
+        /// <returns></returns>
+        public HttpResponseMessage ToHttpResponse()
+        {
+            string json = JsonConvert.SerializeObject(this);
+
+            return new HttpResponseMessage()
+            {
+                Content = new StringContent(
+                    json,
+                    Encoding.UTF8,
+                    "application/json"
+                )
+            };
+        }
+        /// <summary>
+        /// Converts StatusMessage into a string appropriate for logging in a text file
+        /// </summary>
+        /// <param name="IndentLevel">Prepends dashes to indent the text for inner statuses (3 x IndentInterval)</param>
+        /// <returns></returns>
+        public string ToStringForLog(int IndentLevel = 0)
+        {
+            var sb = new StringBuilder();
+            var indent = string.Concat(Enumerable.Repeat("---", IndentLevel)) + " ";
+
+            sb.AppendLine(string.Format("{0}Success: {1}", indent, this.Success));
+
+            if (this.HasMessage)
+            {
+                sb.AppendLine(string.Format("{0}Message: {1}", indent, this.Message));
+                sb.AppendLine(this.MessageDetails);
+            }
+
+            if (this.InnerStatuses.Any())
+            {
+                sb.AppendLine(string.Format("{0}Inner Statuses:", indent));
+                foreach (var message in this.InnerStatuses)
+                {
+                    sb.AppendLine(message.ToStringForLog(IndentLevel + 1));
+                }
+            }
+
+            return sb.ToString();
         }
 
         #endregion

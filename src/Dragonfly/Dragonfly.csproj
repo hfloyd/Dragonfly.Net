@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.13.2</Version>
-    <AssemblyVersion>1.13.2</AssemblyVersion>
-    <FileVersion>1.13.2</FileVersion>
-    <PackageReleaseNotes>Fixing PagingCollection Model</PackageReleaseNotes>
+    <Version>1.14.0</Version>
+    <AssemblyVersion>1.14.0</AssemblyVersion>
+    <FileVersion>1.14.0</FileVersion>
+    <PackageReleaseNotes>Added additional Methods to StatusMessage. Added Range and some custom Comparers and Extensions.</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>

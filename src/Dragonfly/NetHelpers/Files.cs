@@ -570,6 +570,11 @@
 
         #region Get File Information
 
+        /// <summary>
+        /// Checks whether a file exists on disk
+        /// </summary>
+        /// <param name="FullFilePath">Relative or Mapped Path</param>
+        /// <returns>True if file found, false if not</returns>
         public static bool FileExists(string FullFilePath)
         {
             string mappedFilePath = "";
