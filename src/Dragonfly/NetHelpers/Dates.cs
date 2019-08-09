@@ -1,8 +1,9 @@
 ﻿namespace Dragonfly.NetHelpers
 {
     using System;
-    using System.Net.Configuration;
+    using System.Collections.Generic;
     using System.Text;
+    using Dragonfly.NetModels;
 
     public static class Dates
     {
@@ -13,6 +14,132 @@
             MMDDYYYY,
             YYYYMMDD
         }
+
+        #region Extensions to DateTime
+
+        /// <summary>
+        /// Get a text representation of the provided Date relative to Now
+        /// </summary>
+        /// <param name="Date"></param>
+        /// <returns></returns>
+        public static string FuzzyDateFormat(this DateTime Date)
+        {
+            //Based on:http://www.dotnetperls.com/pretty-date
+
+            // Get time span elapsed since the date.
+            TimeSpan s = DateTime.Now.Subtract(Date);
+
+            // Get total number of days elapsed.
+            int dayDiff = (int)s.TotalDays;
+
+            // Get total number of seconds elapsed.
+            int secDiff = (int)s.TotalSeconds;
+
+            // Don't allow out of range values.
+            if (dayDiff < 0)
+            {
+                return "";
+            }
+
+            // Handle same-day times.
+            if (dayDiff == 0)
+            {
+                // Less than one minute ago.
+                if (secDiff < 60)
+                {
+                    return "just now";
+                }
+
+                // Less than 2 minutes ago.
+                if (secDiff < 120)
+                {
+                    return "1 minute ago";
+                }
+
+                // Less than one hour ago.
+                if (secDiff < 3600)
+                {
+                    return string.Format("{0} minutes ago",
+                        Math.Floor((double)secDiff / 60));
+                }
+
+                // Less than 2 hours ago.
+                if (secDiff < 7200)
+                {
+                    return "1 hour ago";
+                }
+
+                // Less than one day ago.
+                if (secDiff < 86400)
+                {
+                    return string.Format("{0} hours ago",
+                        Math.Floor((double)secDiff / 3600));
+                }
+            }
+
+            // Handle previous days.
+            if (dayDiff == 1)
+            {
+                return "yesterday";
+            }
+            if (dayDiff < 7)
+            {
+                return string.Format("{0} days ago", dayDiff);
+            }
+            if (dayDiff < 31)
+            {
+                return string.Format("{0} weeks ago",
+                    Math.Ceiling((double)dayDiff / 7));
+            }
+            if (dayDiff < 366)
+            {
+                return string.Format("{0} months ago",
+                    Math.Ceiling((double)dayDiff / 30));
+            }
+            if (dayDiff > 365 & dayDiff < 730)
+            {
+                return "More than a year ago";
+                //return string.Format("{0} years ago",
+                //Math.Ceiling((double)dayDiff / 365));
+            }
+            //if (dayDiff > 365 & dayDiff < 730)
+            //{
+            return string.Format("More than {0} years ago",
+                Math.Ceiling((double)dayDiff / 365));
+            //}
+        }
+
+        /// <summary>
+        /// Get a text representation of the provided Date relative to Now
+        /// </summary>
+        /// <param name="Date"></param>
+        /// <returns></returns>
+        public static string FuzzyDateFormat(this Nullable<DateTime> Date)
+        {
+            if (Date != null)
+            {
+                return ((DateTime)Date).FuzzyDateFormat();
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// Get the number of the current quarter (1-4) using calendar quarters
+        /// </summary>
+        /// <param name="Date"></param>
+        /// <returns></returns>
+        public static int GetQuarter(this DateTime Date)
+        {
+            return (Date.Month + 2) / 3;
+        }
+
+
+        #endregion
+
+        #region Functions
 
         /// <summary>
         /// Given an integer representing the month, will return a formatted version
@@ -29,6 +156,14 @@
             return tempDate.ToString(Format);
         }
 
+        /// <summary>
+        /// Takes Month, Day, and Year strings and combines them into a specified date format
+        /// </summary>
+        /// <param name="Month"></param>
+        /// <param name="Day"></param>
+        /// <param name="Year"></param>
+        /// <param name="DateFormat"></param>
+        /// <returns></returns>
         public static string ConcatenateDate(string Month, string Day, string Year, string DateFormat = "MM/dd/yyyy")
         {
             string ReturnString = "";
@@ -86,7 +221,7 @@
         {
             var finalDates = "";
 
-            if (StartDate.Date == EndDate.Date || EndDate== DateTime.MinValue)
+            if (StartDate.Date == EndDate.Date || EndDate == DateTime.MinValue)
             {
                 //Dates are the same, return only 1
                 switch (PreferredFormat)
@@ -169,7 +304,7 @@
             if (TestMode == true)
             {
                 var finalOutput = new StringBuilder();
-                DateTime start ;
+                DateTime start;
                 DateTime end;
 
                 //Single Day
@@ -214,19 +349,24 @@
             {
                 return FormatDateRange(StartDate, EndDate, FullDateFormat, MonthDateFormat, DayDateFormat,
                     PreferredFormat, RangeDelim);
-            }           
+            }
         }
 
         [Obsolete("Use version with explicit RangeDelim provided")]
         public static string FormatDateRange(DateTime StartDate, DateTime EndDate, string FullDateFormat,
             string MonthDateFormat, string DayDateFormat, string PreferredFormat)
         {
-            var RangeDelim = " - "; 
+            var RangeDelim = " - ";
             return FormatDateRange(StartDate, EndDate, FullDateFormat, MonthDateFormat, DayDateFormat,
                 PreferredFormat, RangeDelim);
         }
 
-
+        /// <summary>
+        /// Tests a string against a provided format for a valid date
+        /// </summary>
+        /// <param name="DateStringToTest"></param>
+        /// <param name="DateFormat"></param>
+        /// <returns></returns>
         public static bool IsValidDate(string DateStringToTest, string DateFormat)
         {
             bool ValidDate = false;
@@ -249,106 +389,44 @@
             return ValidDate;
         }
 
-    
-        public static string FuzzyDateFormat(this DateTime d)
+        #endregion
+
+        #region Date-related Collections
+
+        public static IEnumerable<CalendarQuarter> GetPreviousQuarters(int NumberToReturn, DateTime Date,
+            bool IncludeCurrent = false)
         {
-            //Based on:http://www.dotnetperls.com/pretty-date
+            var qtrs = new List<CalendarQuarter>();
+           
+            CalendarQuarter quarter;
+            //var lastQuarterYear = 0;
 
-            // Get time span elapsed since the date.
-            TimeSpan s = DateTime.Now.Subtract(d);
-
-            // Get total number of days elapsed.
-            int dayDiff = (int)s.TotalDays;
-
-            // Get total number of seconds elapsed.
-            int secDiff = (int)s.TotalSeconds;
-
-            // Don't allow out of range values.
-            if (dayDiff < 0)
+            var currentQuarter = new CalendarQuarter(Date);
+            
+            if (IncludeCurrent)
             {
-                return "";
-            }
-
-            // Handle same-day times.
-            if (dayDiff == 0)
-            {
-                // Less than one minute ago.
-                if (secDiff < 60)
-                {
-                    return "just now";
-                }
-
-                // Less than 2 minutes ago.
-                if (secDiff < 120)
-                {
-                    return "1 minute ago";
-                }
-
-                // Less than one hour ago.
-                if (secDiff < 3600)
-                {
-                    return string.Format("{0} minutes ago",
-                        Math.Floor((double)secDiff / 60));
-                }
-
-                // Less than 2 hours ago.
-                if (secDiff < 7200)
-                {
-                    return "1 hour ago";
-                }
-
-                // Less than one day ago.
-                if (secDiff < 86400)
-                {
-                    return string.Format("{0} hours ago",
-                        Math.Floor((double)secDiff / 3600));
-                }
-            }
-
-            // Handle previous days.
-            if (dayDiff == 1)
-            {
-                return "yesterday";
-            }
-            if (dayDiff < 7)
-            {
-                return string.Format("{0} days ago", dayDiff);
-            }
-            if (dayDiff < 31)
-            {
-                return string.Format("{0} weeks ago",
-                    Math.Ceiling((double)dayDiff / 7));
-            }
-            if (dayDiff < 366)
-            {
-                return string.Format("{0} months ago",
-                    Math.Ceiling((double)dayDiff / 30));
-            }
-            if (dayDiff > 365 & dayDiff < 730)
-            {
-                return "More than a year ago";
-                //return string.Format("{0} years ago",
-                //Math.Ceiling((double)dayDiff / 365));
-            }
-            //if (dayDiff > 365 & dayDiff < 730)
-            //{
-            return string.Format("More than {0} years ago",
-                Math.Ceiling((double)dayDiff / 365));
-            //}
-        }
-
-        public static string FuzzyDateFormat(this Nullable<DateTime> d)
-        {
-            if (d != null)
-            {
-                return ((DateTime)d).FuzzyDateFormat();
+                quarter = currentQuarter;
+                //qtrs.Add(currentQuarter);
+                //numToGet = numToGet - 1;
             }
             else
             {
-                return "";
+                quarter = currentQuarter.GetPriorQuarter();
             }
+
+            qtrs.Add(quarter);
+            var numToGet = NumberToReturn - 1;
+
+            for (int i = 0; i < numToGet; i++)
+            {
+                quarter = quarter.GetPriorQuarter();
+                qtrs.Add(quarter);
+            }
+
+            return qtrs;
         }
 
+        #endregion
 
     }
 }

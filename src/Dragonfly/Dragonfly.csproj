@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.14.0</Version>
-    <AssemblyVersion>1.14.0</AssemblyVersion>
-    <FileVersion>1.14.0</FileVersion>
-    <PackageReleaseNotes>Added additional Methods to StatusMessage. Added Range and some custom Comparers and Extensions.</PackageReleaseNotes>
+    <Version>1.15.0</Version>
+    <AssemblyVersion>1.15.0</AssemblyVersion>
+    <FileVersion>1.15.0</FileVersion>
+    <PackageReleaseNotes>Added Date.GetQuarter() &amp; Dates.GetPreviousQuarters() functions, added CalendarQuarter Model</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>
