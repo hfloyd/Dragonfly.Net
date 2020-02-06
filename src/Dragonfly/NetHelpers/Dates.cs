@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Text;
     using Dragonfly.NetModels;
 
@@ -425,6 +426,40 @@
 
             return qtrs;
         }
+
+        /// <summary>
+        /// Get list of Quarters between two dates
+        /// </summary>
+        /// <remarks>WARNING: NEEDS TESTING</remarks>
+        /// <param name="StartDate"></param>
+        /// <param name="EndDate"></param>
+        /// <returns></returns>
+        public static IEnumerable<CalendarQuarter> GetAllQuarters(DateTime StartDate, DateTime EndDate)
+        {
+            var qtrs = new List<CalendarQuarter>();
+
+            var firstQuarter = new CalendarQuarter(StartDate);
+            
+            var lastQuarter = new CalendarQuarter(EndDate);
+
+            var startDate = firstQuarter.StartDate;
+
+            qtrs.Add(lastQuarter);
+
+            CalendarQuarter quarter;
+            quarter = lastQuarter.GetPriorQuarter();
+            qtrs.Add(quarter);
+            do
+            {
+                quarter = quarter.GetPriorQuarter();
+                qtrs.Add(quarter);
+            } while (quarter.StartDate> startDate);
+            
+            qtrs.Add(firstQuarter);
+
+            return qtrs;
+        }
+
 
         #endregion
 

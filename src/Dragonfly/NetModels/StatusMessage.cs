@@ -12,6 +12,9 @@
     /// </summary>
     public class StatusMessage
     {
+        private Type _relatedObjectType;
+        private object _relatedObject;
+
         #region Properties
 
         /// <summary>
@@ -88,11 +91,28 @@
         /// Status Messages can be nested
         /// </summary>
         public List<StatusMessage> InnerStatuses { get; set; }
-        
+
         /// <summary>
         /// Object which can be appended for additional information
         /// </summary>
-        public object RelatedObject { get; set; }
+        public object RelatedObject
+        {
+            get => _relatedObject;
+            set
+            {
+                _relatedObject = value;
+                _relatedObjectType = value.GetType();
+            }
+        }
+
+        /// <summary>
+        /// Type of the Related Object
+        /// </summary>
+        public Type RelatedObjectType
+        {
+            get => _relatedObjectType;
+        }
+
         #endregion
 
 
@@ -123,7 +143,7 @@
             {
                 this.TimestampStart = DateTime.Now;
             }
-            
+
         }
 
         public StatusMessage(bool WasSuccessful, string Msg, DateTime? StartTimestamp = null)
