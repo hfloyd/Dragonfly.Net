@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.Specialized;
     using System.Linq;
 
     //using System.Web;
@@ -26,6 +27,20 @@
         {
             return list.ToList().FindIndex(finder);
         }
+        #endregion
+
+        #region ======= Dictionary 
+        public static NameValueCollection ToNameValueCollection(this Dictionary<string, string> Dict)
+        {
+            var nvc = new NameValueCollection();
+            foreach (var item in Dict)
+            {
+                nvc.Add(item.Key, item.Value);
+            }
+
+            return nvc;
+        }
+
         #endregion
     }
 }

@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.16.0</Version>
-    <AssemblyVersion>1.16.0</AssemblyVersion>
-    <FileVersion>1.16.0</FileVersion>
-    <PackageReleaseNotes>Added StatusMessage.RelatedObjectType property</PackageReleaseNotes>
+    <Version>1.17.0</Version>
+    <AssemblyVersion>1.17.0</AssemblyVersion>
+    <FileVersion>1.17.0</FileVersion>
+    <PackageReleaseNotes>Added Dictionary.ToNameValueCollection() extension</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>
@@ -26,8 +26,8 @@
     <DocumentationFile>bin\Debug\net45\Dragonfly.Net.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.4.9.5" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.4.9.5" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
@@ -38,4 +38,8 @@
   </ItemGroup>
 
   <Import Project="..\Custom.targets" />
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="REM XCOPY /s /y  &quot;$(TargetDir)$(TargetName).*&quot;  &quot;C:\Users\xx.Web\bin\&quot;&#xD;&#xA;" />
+  </Target>
 </Project>
