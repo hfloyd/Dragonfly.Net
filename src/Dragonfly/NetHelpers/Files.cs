@@ -753,17 +753,20 @@
         public static string GetMappedPath(string MappedOrRelativePath)
         {
             string MappedFolderPath = "";
-            try
+            if (MappedOrRelativePath != null)
             {
-                MappedFolderPath = HttpContext.Current.Server.MapPath(MappedOrRelativePath);
-            }
-            catch (HttpException exMapPath)
-            {
-                //TODO: Update using new code pattern:
-                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-                //var msg = string.Format("");
-                //Info.LogException("Files.GetMappedPath", exMapPath, "(Error handled by Code - Path was already mapped)", true);
-                MappedFolderPath = MappedOrRelativePath;
+                try
+                {
+                    MappedFolderPath = HttpContext.Current.Server.MapPath(MappedOrRelativePath);
+                }
+                catch (HttpException exMapPath)
+                {
+                    //TODO: Update using new code pattern:
+                    //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
+                    //var msg = string.Format("");
+                    //Info.LogException("Files.GetMappedPath", exMapPath, "(Error handled by Code - Path was already mapped)", true);
+                    MappedFolderPath = MappedOrRelativePath;
+                }
             }
 
             return MappedFolderPath;
