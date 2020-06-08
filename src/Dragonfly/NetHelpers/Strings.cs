@@ -475,7 +475,13 @@
             return fixedHtml;
         }
 
-        public static string MakeCamelCase(this string Original)
+        /// <summary>
+        /// Takes a string with multiple words and returns a string with all words capitalized
+        /// </summary>
+        /// <param name="Original"></param>
+        /// <param name="LowercaseAbbreviations">If TRUE will change ALL CAPS words to lowercase before capitalizing (returns 'All Caps Words')</param>
+        /// <returns></returns>
+        public static string MakeCamelCase(this string Original, bool LowercaseAbbreviations = false)
         {
             var finalString = "";
 
@@ -483,7 +489,15 @@
 
             foreach (var word in allWords)
             {
-                finalString += word.Capitalize();
+                if (LowercaseAbbreviations)
+                {
+                    finalString += word.ToLower().Capitalize();
+                }
+                else
+                {
+                    finalString += word.Capitalize();
+                }
+                
             }
 
             return finalString;

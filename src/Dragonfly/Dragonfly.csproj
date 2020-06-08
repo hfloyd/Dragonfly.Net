@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.17.0</Version>
-    <AssemblyVersion>1.17.0</AssemblyVersion>
-    <FileVersion>1.17.0</FileVersion>
-    <PackageReleaseNotes>Added Dictionary.ToNameValueCollection() extension</PackageReleaseNotes>
+    <Version>1.18.0</Version>
+    <AssemblyVersion>1.18.0</AssemblyVersion>
+    <FileVersion>1.18.0</FileVersion>
+    <PackageReleaseNotes>Updated MakeCamelCase() function</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>
