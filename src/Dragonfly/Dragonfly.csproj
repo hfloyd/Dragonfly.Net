@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.19.0</Version>
-    <AssemblyVersion>1.19.0</AssemblyVersion>
-    <FileVersion>1.19.0</FileVersion>
-    <PackageReleaseNotes>Added HtmlEncode and HtmlDecode</PackageReleaseNotes>
+    <Version>1.20.0</Version>
+    <AssemblyVersion>1.20.0</AssemblyVersion>
+    <FileVersion>1.20.0</FileVersion>
+    <PackageReleaseNotes>Fixing Html &amp; Url Encode/Decode</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>

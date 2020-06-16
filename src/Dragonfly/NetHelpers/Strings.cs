@@ -605,7 +605,7 @@
         /// <returns></returns>
         public static string HtmlEncode(this string OriginalString)
         { 
-            return System.Web.HttpUtility.UrlEncode(OriginalString);
+            return System.Web.HttpUtility.HtmlEncode(OriginalString);
         }
 
         /// <summary>
@@ -614,6 +614,26 @@
         /// <param name="EncodedString"></param>
         /// <returns></returns>
         public static string HtmlDecode(this string EncodedString)
+        {
+            return System.Web.HttpUtility.HtmlDecode(EncodedString);
+        }
+
+        /// <summary>
+        /// Encodes the string
+        /// </summary>
+        /// <param name="OriginalString"></param>
+        /// <returns></returns>
+        public static string UrlEncode(this string OriginalString)
+        {
+            return System.Web.HttpUtility.UrlEncode(OriginalString);
+        }
+
+        /// <summary>
+        /// Decodes the string
+        /// </summary>
+        /// <param name="EncodedString"></param>
+        /// <returns></returns>
+        public static string UrlDecode(this string EncodedString)
         {
             return System.Web.HttpUtility.UrlDecode(EncodedString);
         }
