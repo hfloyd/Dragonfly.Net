@@ -597,6 +597,27 @@
             return new HtmlString(StringToFix.Replace("\r\n", "<br />").Replace("\n", "<br />"));
         }
 
+
+        /// <summary>
+        /// Encodes the string
+        /// </summary>
+        /// <param name="OriginalString"></param>
+        /// <returns></returns>
+        public static string HtmlEncode(this string OriginalString)
+        { 
+            return System.Web.HttpUtility.UrlEncode(OriginalString);
+        }
+
+        /// <summary>
+        /// Decodes the string
+        /// </summary>
+        /// <param name="EncodedString"></param>
+        /// <returns></returns>
+        public static string HtmlDecode(this string EncodedString)
+        {
+            return System.Web.HttpUtility.UrlDecode(EncodedString);
+        }
+
         #endregion
 
         #region Returning a String from a String or Multiple Strings

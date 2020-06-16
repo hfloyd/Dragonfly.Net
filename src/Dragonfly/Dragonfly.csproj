@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.18.0</Version>
-    <AssemblyVersion>1.18.0</AssemblyVersion>
-    <FileVersion>1.18.0</FileVersion>
-    <PackageReleaseNotes>Updated MakeCamelCase() function</PackageReleaseNotes>
+    <Version>1.19.0</Version>
+    <AssemblyVersion>1.19.0</AssemblyVersion>
+    <FileVersion>1.19.0</FileVersion>
+    <PackageReleaseNotes>Added HtmlEncode and HtmlDecode</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>
