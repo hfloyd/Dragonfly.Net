@@ -331,8 +331,8 @@
         {
             var uri = OriginalUri;
 
-            var baseUrl = uri.AbsoluteUri;
-            var basePath = uri.AbsolutePath;
+            var baseUrl = uri.AbsoluteUri.Replace(uri.Query,"");
+           // var basePath = uri.AbsolutePath;
 
             //Anchor Tag
             var currAnchor = uri.Fragment.Replace("#", "");
@@ -367,7 +367,7 @@
             var allQs = AssembleQueryString(qs);
 
             //Build New Url
-            var newUrl = string.Format("{0}?{1}{2}", basePath, allQs, newAnchor);
+            var newUrl = string.Format("{0}?{1}{2}", baseUrl, allQs, newAnchor);
             newUrl = newUrl.Replace("?&", "?"); //Cleanup if all QS have been removed
 
             return newUrl;
