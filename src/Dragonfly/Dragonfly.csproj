@@ -18,7 +18,15 @@
     <AssemblyVersion>1.20.0</AssemblyVersion>
     <FileVersion>1.20.0</FileVersion>
     <PackageReleaseNotes>Fixing Html &amp; Url Encode/Decode</PackageReleaseNotes>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Dragonfly.Net.xml</DocumentationFile>
   </PropertyGroup>
