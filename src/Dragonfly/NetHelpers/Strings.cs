@@ -503,6 +503,11 @@
             return finalString;
         }
 
+        /// <summary>
+        /// Return a string with the first letter capitalized
+        /// </summary>
+        /// <param name="Word"></param>
+        /// <returns></returns>
         public static string Capitalize(this string Word)
         {
             var finalString = "";
@@ -524,6 +529,23 @@
             }
 
             return finalString;
+        }
+
+        /// <summary>
+        /// Create an Abbreviation from a full string
+        /// </summary>
+        /// <param name="FullString"></param>
+        /// <returns></returns>
+        public static string Abbreviate(this string FullString)
+        {
+            string abbreviation = new string(
+                FullString.Split()
+                    .Where(s => s.Length > 0 && char.IsLetter(s[0]) && char.IsUpper(s[0]))
+                    .Take(3)
+                    .Select(s => s[0])
+                    .ToArray());
+
+            return abbreviation;
         }
 
         public static string SplitByTokenIfItExists(string Name, string Token)

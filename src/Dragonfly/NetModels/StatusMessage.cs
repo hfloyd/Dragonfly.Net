@@ -101,7 +101,11 @@
             set
             {
                 _relatedObject = value;
-                _relatedObjectType = value.GetType();
+
+                if (value != null)
+                {
+                    _relatedObjectType = value.GetType();
+                }
             }
         }
 
