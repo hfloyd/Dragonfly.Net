@@ -70,12 +70,50 @@
             }
         }
 
+        #endregion
+
+        #region Get QueryString Values
+
+        /// <summary>
+        /// Returns the Querystring value cast to T, or the Default, if missing
+        /// </summary>
+        /// <param name="Request">HttpRequest (Just use 'Request')</param>
+        /// <param name="QueryStringKey">Key name</param>
+        /// <param name="DefaultIfMissing">A default value to return in case the Querystring value is missing</param>
+        /// <returns></returns>
+        public static T GetSafeQueryStringValue<T>(System.Web.HttpRequestBase Request, string QueryStringKey, T DefaultIfMissing)
+        {
+            var qsVal = Request.QueryString[QueryStringKey];
+
+            if (!string.IsNullOrEmpty(qsVal))
+            {
+                //try conversion
+                try
+                {
+                    var qsObj = (object)qsVal;
+                    return (T)qsObj;
+                }
+                catch (Exception e)
+                {
+                    throw;
+                }
+            }
+            else
+            {
+                //No QS val matching Key
+                return DefaultIfMissing;
+            }
+        }
+
+
+
         /// <summary>
         /// Returns a string value (empty string, if missing)
         /// </summary>
         /// <param name="Request">HttpRequest (Just use 'Request')</param>
         /// <param name="QueryStringKey">Key name</param>
         /// <returns></returns>
+        [Obsolete("Use GetSafeQueryStringValue<T>()")]
         public static string GetSafeQueryString(System.Web.HttpRequestBase Request, string QueryStringKey)
         {
             var returnVal = "";
@@ -96,6 +134,7 @@
         /// <param name="Request">HttpRequest (Just use 'Request')</param>
         /// <param name="QueryStringKey">Key name</param>
         /// <returns></returns>
+        [Obsolete("Use GetSafeQueryStringValue<T>()")]
         public static bool GetSafeQueryBool(System.Web.HttpRequestBase Request, string QueryStringKey)
         {
             var returnVal = false;
@@ -112,6 +151,7 @@
             return returnVal;
         }
 
+   
         static string GetSafeQuery(this Uri uri)
         {
             //Copied from https://github.com/umbraco/Umbraco-CMS/blob/d50e49ad37fd5ca7bad2fd6e8fc994f3408ae70c/src/Umbraco.Core/UriExtensions.cs
@@ -127,6 +167,7 @@
 
             return query;
         }
+
 
         #endregion
 
@@ -331,8 +372,8 @@
         {
             var uri = OriginalUri;
 
-            var baseUrl = uri.AbsoluteUri.Replace(uri.Query,"");
-           // var basePath = uri.AbsolutePath;
+            var baseUrl = uri.AbsoluteUri.Replace(uri.Query, "");
+            // var basePath = uri.AbsolutePath;
 
             //Anchor Tag
             var currAnchor = uri.Fragment.Replace("#", "");

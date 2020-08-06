@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.22.0</Version>
-    <AssemblyVersion>1.22.0</AssemblyVersion>
-    <FileVersion>1.22.0</FileVersion>
-    <PackageReleaseNotes>New Abbreviation() function, fix to StatusMessage</PackageReleaseNotes>
+    <Version>1.24.0</Version>
+    <AssemblyVersion>1.24.0</AssemblyVersion>
+    <FileVersion>1.24.0</FileVersion>
+    <PackageReleaseNotes>New Url.GetSafeQueryStringValue&lt;T&gt; function</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
