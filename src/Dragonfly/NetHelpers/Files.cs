@@ -7,6 +7,7 @@
     using System.Text;
     using System.Threading;
     using System.Web;
+    using System.Web.Hosting;
 
     /// <summary>
     /// Helpers to handle File I/O
@@ -737,7 +738,7 @@
 
         public static string UnMapPath(string MappedPath)
         {
-            string RootMapPath = HttpContext.Current.Server.MapPath("/");
+            string RootMapPath = GetMappedPath("/");
             string VirtualPath = "";
 
 
@@ -750,6 +751,12 @@
             return VirtualPath;
         }
 
+        /// <summary>
+        /// Get a mapped path of the provided path
+        /// </summary>
+        /// <param name="MappedOrRelativePath">The Path to look for</param>
+        /// <returns>The Mapped path</returns>
+        [Obsolete("Consider using TryGetMappedPath()")]
         public static string GetMappedPath(string MappedOrRelativePath)
         {
             string MappedFolderPath = "";
@@ -757,19 +764,87 @@
             {
                 try
                 {
-                    MappedFolderPath = HttpContext.Current.Server.MapPath(MappedOrRelativePath);
+                    if (HttpContext.Current != null)
+                    {
+                        MappedFolderPath = HttpContext.Current.Server.MapPath(MappedOrRelativePath);
+                    }
+                    else
+                    {
+                        MappedFolderPath = HostingEnvironment.MapPath(MappedOrRelativePath);
+                    }
+
                 }
-                catch (HttpException exMapPath)
+                catch (Exception ex)
                 {
-                    //TODO: Update using new code pattern:
-                    //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-                    //var msg = string.Format("");
-                    //Info.LogException("Files.GetMappedPath", exMapPath, "(Error handled by Code - Path was already mapped)", true);
-                    MappedFolderPath = MappedOrRelativePath;
+                    //Try AppDomain
+                    var fixedPath = "";
+                    if (MappedOrRelativePath.StartsWith("~"))
+                    {
+                        fixedPath = MappedOrRelativePath.Replace("~/", "");
+                        MappedFolderPath = Path.Combine(HttpRuntime.AppDomainAppPath, fixedPath);
+                    }
+                    else if (MappedOrRelativePath.StartsWith("/"))
+                    {
+                        fixedPath = MappedOrRelativePath.TrimStart('/');
+                        MappedFolderPath = Path.Combine(HttpRuntime.AppDomainAppPath, fixedPath);
+                    }
+                    else
+                    {
+                        MappedFolderPath = MappedOrRelativePath;
+                    }
+                    //Yes, the error is getting swallowed
                 }
             }
 
             return MappedFolderPath;
+        }
+
+        /// <summary>
+        /// Tries to get a mapped path of the provided path
+        /// </summary>
+        /// <param name="MappedOrRelativePath">The Path to look for</param>
+        /// <param name="MappedFolderPath">The Mapped path, returned</param>
+        /// <returns>False, if an exception occurred</returns>
+        public static bool TryGetMappedPath(string MappedOrRelativePath, out string MappedFolderPath)
+        {
+            MappedFolderPath = "";
+            if (MappedOrRelativePath != null)
+            {
+                try
+                {
+                    if (HttpContext.Current != null)
+                    {
+                        MappedFolderPath = HttpContext.Current.Server.MapPath(MappedOrRelativePath);
+                    }
+                    else
+                    {
+                        MappedFolderPath = HostingEnvironment.MapPath(MappedOrRelativePath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Try AppDomain
+                    var fixedPath = "";
+                    if (MappedOrRelativePath.StartsWith("~"))
+                    {
+                        fixedPath = MappedOrRelativePath.Replace("~/", "");
+                        MappedFolderPath = Path.Combine(HttpRuntime.AppDomainAppPath, fixedPath);
+                    }
+                    else if (MappedOrRelativePath.StartsWith("/"))
+                    {
+                        fixedPath = MappedOrRelativePath.TrimStart('/');
+                        MappedFolderPath = Path.Combine(HttpRuntime.AppDomainAppPath, fixedPath);
+                    }
+                    else
+                    {
+                        MappedFolderPath = MappedOrRelativePath;
+                        return false;
+                    }
+
+                }
+            }
+
+            return true;
         }
 
         #endregion

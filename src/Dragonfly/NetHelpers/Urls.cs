@@ -6,9 +6,12 @@
     using System.Linq;
     using System.Net;
 
-    public static class Url
+    /// <summary>
+    /// Functions to assit with Url-related tasks - reading, editing/building, query strings, basic calling
+    /// </summary>
+    public static class Urls
     {
-        private const string ThisClassName = "Dragonfly.NetHelpers.Url";
+        private const string ThisClassName = "Dragonfly.NetHelpers.Urls";
 
         #region Read Data from Url
 
@@ -74,36 +77,38 @@
 
         #region Get QueryString Values
 
-        /// <summary>
-        /// Returns the Querystring value cast to T, or the Default, if missing
-        /// </summary>
-        /// <param name="Request">HttpRequest (Just use 'Request')</param>
-        /// <param name="QueryStringKey">Key name</param>
-        /// <param name="DefaultIfMissing">A default value to return in case the Querystring value is missing</param>
-        /// <returns></returns>
-        public static T GetSafeQueryStringValue<T>(System.Web.HttpRequestBase Request, string QueryStringKey, T DefaultIfMissing)
-        {
-            var qsVal = Request.QueryString[QueryStringKey];
+        ///// <summary>
+        ///// Returns the Querystring value cast to T, or the Default, if missing
+        ///// </summary>
+        ///// <param name="Request">HttpRequest (Just use 'Request')</param>
+        ///// <param name="QueryStringKey">Key name</param>
+        ///// <param name="DefaultIfMissing">A default value to return in case the Querystring value is missing</param>
+        ///// <returns></returns>
+        //public static T GetSafeQueryStringValue<T>(System.Web.HttpRequestBase Request, string QueryStringKey, T DefaultIfMissing)
+        //{
+        //    var qsVal = Request.QueryString[QueryStringKey];
 
-            if (!string.IsNullOrEmpty(qsVal))
-            {
-                //try conversion
-                try
-                {
-                    var qsObj = (object)qsVal;
-                    return (T)qsObj;
-                }
-                catch (Exception e)
-                {
-                    throw;
-                }
-            }
-            else
-            {
-                //No QS val matching Key
-                return DefaultIfMissing;
-            }
-        }
+        //    if (!string.IsNullOrEmpty(qsVal))
+        //    {
+        //        //try conversion
+        //        try
+        //        {
+        //            var qsObj = (object)qsVal;
+        //            return (T)qsObj;
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            //try some specific conversions
+        //            if(typeof(T) == typeint)
+        //            throw;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        //No QS val matching Key
+        //        return DefaultIfMissing;
+        //    }
+        //}
 
 
 
@@ -112,11 +117,11 @@
         /// </summary>
         /// <param name="Request">HttpRequest (Just use 'Request')</param>
         /// <param name="QueryStringKey">Key name</param>
+        /// <param name="DefaultIfMissing">Value to return if missing/empty</param>
         /// <returns></returns>
-        [Obsolete("Use GetSafeQueryStringValue<T>()")]
-        public static string GetSafeQueryString(System.Web.HttpRequestBase Request, string QueryStringKey)
+        public static string GetSafeQueryString(System.Web.HttpRequestBase Request, string QueryStringKey, string DefaultIfMissing ="")
         {
-            var returnVal = "";
+            var returnVal = DefaultIfMissing;
 
             var qsVal = Request.QueryString[QueryStringKey];
 
@@ -133,11 +138,11 @@
         /// </summary>
         /// <param name="Request">HttpRequest (Just use 'Request')</param>
         /// <param name="QueryStringKey">Key name</param>
+        /// <param name="DefaultIfMissing">Value to return if missing/empty</param>
         /// <returns></returns>
-        [Obsolete("Use GetSafeQueryStringValue<T>()")]
-        public static bool GetSafeQueryBool(System.Web.HttpRequestBase Request, string QueryStringKey)
+        public static bool GetSafeQueryBool(System.Web.HttpRequestBase Request, string QueryStringKey, bool DefaultIfMissing = false)
         {
-            var returnVal = false;
+            var returnVal = DefaultIfMissing;
 
             var qsVal = Request.QueryString[QueryStringKey];
 
@@ -151,7 +156,31 @@
             return returnVal;
         }
 
-   
+
+        /// <summary>
+        /// Returns a boolean value. Assumes "True" or "true" as string. (false, if missing) 
+        /// </summary>
+        /// <param name="Request">HttpRequest (Just use 'Request')</param>
+        /// <param name="QueryStringKey">Key name</param>
+        /// <param name="DefaultIfMissing">Value to return if missing/empty</param>
+        /// <returns></returns>
+        public static int GetSafeQueryInt(System.Web.HttpRequestBase Request, string QueryStringKey, int DefaultIfMissing = 0)
+        {
+            var returnVal = DefaultIfMissing;
+
+            var qsVal = Request.QueryString[QueryStringKey];
+
+            if (!string.IsNullOrEmpty(qsVal))
+            {
+                var isInt = Int32.TryParse(qsVal, out int intVal);
+                if (isInt)
+                {
+                    returnVal = intVal;
+                }
+            }
+            return returnVal;
+        }
+
         static string GetSafeQuery(this Uri uri)
         {
             //Copied from https://github.com/umbraco/Umbraco-CMS/blob/d50e49ad37fd5ca7bad2fd6e8fc994f3408ae70c/src/Umbraco.Core/UriExtensions.cs
