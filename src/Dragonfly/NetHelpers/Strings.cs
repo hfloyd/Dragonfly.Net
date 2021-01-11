@@ -448,7 +448,7 @@
         /// <param name="HtmlString">String to search and replace in</param>
         /// <param name="Target">Target for links (default = '_blank' (new window))</param>
         /// <returns></returns>
-        public static string EnableHtmlLinks(this string HtmlString, string Target="_blank")
+        public static string EnableHtmlLinks(this string HtmlString, string Target = "_blank")
         {
             var fixedHtml = HtmlString;
 
@@ -497,7 +497,7 @@
                 {
                     finalString += word.Capitalize();
                 }
-                
+
             }
 
             return finalString;
@@ -548,15 +548,34 @@
             return abbreviation;
         }
 
-        public static string SplitByTokenIfItExists(string Name, string Token)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="TextToSplit"></param>
+        /// <param name="Token"></param>
+        /// <returns></returns>
+        public static string SplitByTokenIfItExists(string TextToSplit, string Token)
         {
-            if (Name.IndexOf(Token) > -1)
+            if (!string.IsNullOrEmpty(TextToSplit))
             {
-                return Name.Substring(0, Name.IndexOf(Token));
+                if (TextToSplit.IndexOf(Token) > -1)
+                {
+                    return TextToSplit.Substring(0, TextToSplit.IndexOf(Token));
+                }
+                return TextToSplit;
             }
-            return Name;
+            else
+            {
+                return "";
+            }
+
         }
 
+        /// <summary>
+        /// Removes numbers from a string
+        /// </summary>
+        /// <param name="TextWithNumbers"></param>
+        /// <returns></returns>
         public static string StripNumbers(string TextWithNumbers)
         {
             var stripped = TextWithNumbers;
@@ -566,24 +585,24 @@
             return stripped;
         }
 
-        [Obsolete("Use 'RemoveAllParagraphTags()")]
-        public static string RemoveParagraphTags(this string Html, bool RetainBreaks)
-        {
-            return Html.RemoveAllParagraphTags(RetainBreaks);
-        }
-
-        [Obsolete("Use 'RemoveAllParagraphTags()")]
-        public static IHtmlString RemoveParagraphTags(this IHtmlString Html, bool RetainBreaks)
-        {
-            return Html.RemoveAllParagraphTags(RetainBreaks);
-        }
-
+        /// <summary>
+        /// Remove all &lt;p&gt; tags
+        /// </summary>
+        /// <param name="Html"></param>
+        /// <param name="RetainBreaks">Replaces the paragraph tag with two &lt;br&gt; tags</param>
+        /// <returns></returns>
         public static string RemoveAllParagraphTags(this string Html, bool RetainBreaks)
         {
             var result = RemoveAllParagraphTags(new HtmlString(Html), RetainBreaks);
             return result.ToString();
         }
 
+        /// <summary>
+        /// Remove all &lt;p&gt; tags
+        /// </summary>
+        /// <param name="Html"></param>
+        /// <param name="RetainBreaks">Replaces the paragraph tag with two &lt;br&gt; tags</param>
+        /// <returns></returns>
         public static IHtmlString RemoveAllParagraphTags(this IHtmlString Html, bool RetainBreaks)
         {
             var result = Html.ToString();
@@ -614,9 +633,149 @@
             return new HtmlString(result);
         }
 
+        /// <summary>
+        /// Strips out &lt;P&gt; and &lt;/P&gt; tags if they were used as a wrapper
+        /// for other HTML content.
+        /// </summary>
+        /// <param name="Text">The HTML text.</param>
+        /// <param name="ConvertEmptyParagraphsToBreaks"></param>
+        public static IHtmlString RemoveParagraphWrapperTags(this IHtmlString Text, bool ConvertEmptyParagraphsToBreaks = false)
+        {
+            var str = Text.ToString();
+            var fixedText = str.RemoveParagraphWrapperTags(ConvertEmptyParagraphsToBreaks);
+            return new HtmlString(fixedText);
+        }
+
+
+        /// <summary>
+        /// Strips out &lt;P&gt; and &lt;/P&gt; tags if they were used as a wrapper
+        /// for other HTML content.
+        /// </summary>
+        /// <param name="Text">The HTML text.</param>
+        /// <param name="ConvertEmptyParagraphsToBreaks"></param>
+        public static string RemoveParagraphWrapperTags(this string Text, bool ConvertEmptyParagraphsToBreaks = false)
+        {
+            if (string.IsNullOrEmpty(Text))
+            {
+                return Text;
+            }
+
+            string trimmedText = Text.Trim();
+
+            if (ConvertEmptyParagraphsToBreaks)
+            {
+                //trimmedText = trimmedText.Replace("<p>", "<P>");
+                //trimmedText = trimmedText.Replace("</p>", "</P>");
+
+                trimmedText = trimmedText.RemoveDoubleSpaces();
+
+                trimmedText = trimmedText.Replace("<p></p>", "<br/>");
+                trimmedText = trimmedText.Replace("<P></P>", "<br/>");
+                trimmedText = trimmedText.Replace("<p> </p>", "<br/>");
+                trimmedText = trimmedText.Replace("<P> </P>", "<br/>");
+                trimmedText = trimmedText.Replace("<p>&nbsp;</p>", "<br/>");
+                trimmedText = trimmedText.Replace("<P>&nbsp;</P>", "<br/>");
+            }
+
+            string upperText = trimmedText.ToUpper();
+            int paragraphIndex = upperText.IndexOf("<P>");
+
+            if (paragraphIndex == -1 ||
+                paragraphIndex != upperText.LastIndexOf("<P>") ||
+                upperText.Substring(upperText.Length - 4, 4) != "</P>")
+            {
+                // Paragraph not used as a wrapper element
+                return Text;
+            }
+
+            // Remove paragraph wrapper tags
+            return trimmedText.Substring(3, trimmedText.Length - 7);
+        }
+
         public static IHtmlString ReplaceLineBreaksForWeb(this string StringToFix)
         {
             return new HtmlString(StringToFix.Replace("\r\n", "<br />").Replace("\n", "<br />"));
+        }
+
+        [Obsolete("Use 'RemoveAllParagraphTags()")]
+        public static string RemoveParagraphTags(this string Html, bool RetainBreaks)
+        {
+            return Html.RemoveAllParagraphTags(RetainBreaks);
+        }
+
+        [Obsolete("Use 'RemoveAllParagraphTags()")]
+        public static IHtmlString RemoveParagraphTags(this IHtmlString Html, bool RetainBreaks)
+        {
+            return Html.RemoveAllParagraphTags(RetainBreaks);
+        }
+
+        /// <summary>
+        /// Umbraco 7 Version
+        /// </summary>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static IHtmlString RemoveFirstParagraphTag(this IHtmlString Text)
+        {
+            var str = Text.ToHtmlString();
+            var fix = RemoveFirstParagraphTag(str);
+            return new HtmlString(fix);
+        }
+
+        /// <summary>
+        /// Umbraco 7 Version
+        /// </summary>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static string RemoveFirstParagraphTag(this string Text)
+        {
+            if (String.IsNullOrEmpty(Text))
+                return "";
+
+            if (Text.Length > 5)
+            {
+                if (Text.ToUpper().Substring(0, 3) == "<P>")
+                    Text = Text.Substring(3, Text.Length - 3);
+                if (Text.ToUpper().Substring(Text.Length - 4, 4) == "</P>")
+                    Text = Text.Substring(0, Text.Length - 4);
+            }
+            return Text;
+        }
+
+
+
+        /// <summary>
+        /// Replaces double spaces with single spaces
+        /// </summary>
+        /// <param name="Text"></param>
+        /// <returns></returns>
+        public static string RemoveDoubleSpaces(this string Text)
+        {
+            string trimmedText = Text.Trim();
+            int dblSpcs = trimmedText.CountStringOccurrences("  ");
+
+            do
+            {
+                trimmedText = trimmedText.Replace("  ", " ");
+                dblSpcs = trimmedText.CountStringOccurrences("  ");
+            } while (dblSpcs > 0);
+
+            return trimmedText;
+        }
+
+        /// <summary>
+        /// Is this string a JSON snippet?
+        /// </summary>
+        /// <param name="Input"></param>
+        /// <returns></returns>
+        public static bool StringIsJson(this string Input)
+        {
+            Input = Input.Trim();
+            if (Input.StartsWith("{") && Input.EndsWith("}"))
+                return true;
+            if (Input.StartsWith("["))
+                return Input.EndsWith("]");
+            else
+                return false;
         }
 
 
@@ -626,7 +785,7 @@
         /// <param name="OriginalString"></param>
         /// <returns></returns>
         public static string HtmlEncode(this string OriginalString)
-        { 
+        {
             return System.Web.HttpUtility.HtmlEncode(OriginalString);
         }
 
