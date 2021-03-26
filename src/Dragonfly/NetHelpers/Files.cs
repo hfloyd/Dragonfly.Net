@@ -1,6 +1,7 @@
 ﻿namespace Dragonfly.NetHelpers
 {
     using System;
+    using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
     using System.Net;
@@ -8,6 +9,7 @@
     using System.Threading;
     using System.Web;
     using System.Web.Hosting;
+    using Dragonfly.NetModels;
 
     /// <summary>
     /// Helpers to handle File I/O
@@ -528,6 +530,14 @@
 
         #region Read Files
 
+        public static IEnumerable<string> ListLocalFiles(string FolderPath)
+        {
+            var mappedPath = Files.GetMappedPath(FolderPath);
+            var files = System.IO.Directory.EnumerateFiles(mappedPath);
+
+            return files;
+        }
+
         /// <summary>
         /// Reads a Text file, returning contents as a string
         /// </summary>
@@ -845,6 +855,71 @@
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Tries to get a mapped path of the provided path
+        /// </summary>
+        /// <param name="MappedOrRelativePath">The Path to look for</param>
+        /// <param name="MappedFolderPath">The Mapped path, returned</param>
+        /// <returns>StatusMessage with information about the operation</returns>
+        public static StatusMessage TryGetMappedPathWithStatus(string MappedOrRelativePath, out string MappedFolderPath)
+        {
+            var status = new StatusMessage();
+            MappedFolderPath = "";
+            if (MappedOrRelativePath != null)
+            {
+                try
+                {
+                    if (MappedOrRelativePath.Contains("\\"))
+                    {
+                        //Path is already a physical path - return it.
+                        MappedFolderPath = MappedOrRelativePath;
+                        status.Success = true;
+                    }
+                    else
+                    {
+                        //Try to Map it
+                        if (HttpContext.Current != null)
+                        {
+                            MappedFolderPath = HttpContext.Current.Server.MapPath(MappedOrRelativePath);
+                            status.Success = true;
+                        }
+                        else
+                        {
+                            MappedFolderPath = HostingEnvironment.MapPath(MappedOrRelativePath);
+                            status.Success = true;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    status.RelatedException = ex;
+
+                    //Try AppDomain
+                    var fixedPath = "";
+                    if (MappedOrRelativePath.StartsWith("~"))
+                    {
+                        fixedPath = MappedOrRelativePath.Replace("~/", "");
+                        MappedFolderPath = Path.Combine(HttpRuntime.AppDomainAppPath, fixedPath);
+                        status.Success = true;
+                    }
+                    else if (MappedOrRelativePath.StartsWith("/"))
+                    {
+                        fixedPath = MappedOrRelativePath.TrimStart('/');
+                        MappedFolderPath = Path.Combine(HttpRuntime.AppDomainAppPath, fixedPath);
+                        status.Success = true;
+                    }
+                    else
+                    {
+                        MappedFolderPath = MappedOrRelativePath;
+                        status.Success = false;
+                        status.Message = $"An error occurred and MappedOrRelativePath '{MappedOrRelativePath}' doesn't start with '~' or '/'";
+                    }
+                }
+            }
+
+            return status;
         }
 
         #endregion

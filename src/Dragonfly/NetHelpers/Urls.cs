@@ -119,7 +119,7 @@
         /// <param name="QueryStringKey">Key name</param>
         /// <param name="DefaultIfMissing">Value to return if missing/empty</param>
         /// <returns></returns>
-        public static string GetSafeQueryString(System.Web.HttpRequestBase Request, string QueryStringKey, string DefaultIfMissing ="")
+        public static string GetSafeQueryString(System.Web.HttpRequestBase Request, string QueryStringKey, string DefaultIfMissing = "")
         {
             var returnVal = DefaultIfMissing;
 
@@ -270,6 +270,28 @@
 
         #region Edit/Build Url
 
+
+        /// <summary>
+        /// Updates a URL with new/additional query string values
+        /// </summary>
+        /// <param name="OriginalUrl">Url string to append to</param>
+        /// <param name="QsDictionary">Query String Key/Value dictionary</param>
+        /// <param name="AppendMatchingTagDelim">The string used to append additional values to an existing Key. If omitted, existing tags will be replaced, not appended.</param>
+        /// <param name="NewAnchor">If Provided, will append/replace the anchor tag</param>
+        /// <returns>URI</returns>
+        public static string AppendQueryStringToUrl(string OriginalUrl, Dictionary<string, string> QsDictionary, string AppendMatchingTagDelim = "", string NewAnchor = "")
+        {
+            var url = new Uri(OriginalUrl);
+            foreach (var qs in QsDictionary)
+            {
+                var newUrl = AppendQueryStringToUrl(url, qs.Key, qs.Value, AppendMatchingTagDelim, NewAnchor);
+                url = new Uri(newUrl);
+            }
+
+            return url.ToString();
+        }
+
+
         /// <summary>
         /// Updates a URL with new/additional query string values
         /// </summary>
@@ -299,8 +321,8 @@
         {
             var uri = OriginalUri;
 
-            var baseUrl = uri.AbsoluteUri;
-            var basePath = uri.AbsolutePath;
+            var baseUrl =$"{uri.Scheme}://{uri.Host}{uri.LocalPath}" ;
+            //var basePath = uri.AbsolutePath;
 
             //Anchor Tag
             var currAnchor = uri.Fragment.Replace("#", "");
@@ -372,7 +394,7 @@
             allQs = allQs.Replace("&&", "");
 
             //Build New Url
-            var newUrl = string.Format("{0}?{1}{2}", basePath, allQs, newAnchor);
+            var newUrl = string.Format("{0}?{1}{2}", baseUrl, allQs, newAnchor);
             newUrl = newUrl.Replace("?&", "?"); //Cleanup if all QS have been removed
             //uri.Rewrite(newUrl);
 
