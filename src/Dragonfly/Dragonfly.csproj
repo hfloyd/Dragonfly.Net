@@ -14,10 +14,10 @@
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.28.0</Version>
-    <AssemblyVersion>1.28.0</AssemblyVersion>
-    <FileVersion>1.28.0</FileVersion>
-    <PackageReleaseNotes>Adding overload for Urls.AppendQueryStringToUrl()</PackageReleaseNotes>
+    <Version>1.29.0</Version>
+    <AssemblyVersion>1.29.0</AssemblyVersion>
+    <FileVersion>1.29.0</FileVersion>
+    <PackageReleaseNotes>Updates to PagingCollection model</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 

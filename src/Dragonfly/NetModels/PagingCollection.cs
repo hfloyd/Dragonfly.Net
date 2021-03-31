@@ -21,7 +21,8 @@
 
         private int _pageSize = DefaultPageSize;
 
-        private IEnumerable<CollectionPage<T>> _pages;
+        private List<CollectionPage<T>> _pages = new List<CollectionPage<T>>();
+        private int _totalItems;
 
         #endregion
 
@@ -69,6 +70,12 @@
             }
         }
 
+        public int TotalItems
+        {
+            get => _totalItems;
+           
+        }
+
         #endregion
 
         #region ctor
@@ -82,6 +89,8 @@
             {
                 throw new ArgumentNullException("Collection");
             }
+
+            this._totalItems = Collection.Count();
             this._pageSize = PageSize;
             this._collection = Collection.ToArray();
             UpdatePages();
@@ -91,8 +100,7 @@
         /// <summary>
         /// Creates paging collection
         /// </summary>
-        public PagingCollection(IEnumerable<T> Collection)
-            : this(Collection, DefaultPageSize)
+        public PagingCollection(IEnumerable<T> Collection) : this(Collection, DefaultPageSize)
         {
             if (Collection == null)
             {
@@ -108,18 +116,30 @@
         #region public methods
 
         /// <summary>
+        /// Returns the Page using the specified page number
+        /// </summary>
+        /// <param name="PageNumber"></param>
+        /// <returns></returns>
+        public CollectionPage<T> GetPage(int PageNumber, bool SupressError)
+        {
+            if (SupressError && PageNumber > _pages.Count)
+            {
+                return null;
+            }
+            else
+            {
+                var pageIndex = PageNumber - 1;
+                return _pages[pageIndex];
+            }
+        }
+
+        /// <summary>
         /// Returns data by page number
         /// </summary>
-        public IEnumerable<T> GetData(int pageNumber)
+        [Obsolete("Use GetPage().Collection instead")]
+        public IEnumerable<T> GetData(int PageNumber)
         {
-            if (pageNumber < 0 || pageNumber > this.PagesCount)
-            {
-                return new T[] { };
-            }
-
-            int offset = (pageNumber - 1) * this.PageSize;
-
-            return this._collection.Skip(offset).Take(this.PageSize);
+            return GetDataFromCollection(PageNumber);
         }
 
         /// <summary>
@@ -127,7 +147,7 @@
         /// </summary>
         public int GetCount(int pageNumber)
         {
-            return this.GetData(pageNumber).Count();
+            return this.GetPage(pageNumber,false).ResultsOnPage;
         }
 
         #endregion
@@ -192,7 +212,7 @@
                     var toSkip = i * this._pageSize;
 
                     page.PageNumber = i + 1;
-                    page.Collection = this.GetData(page.PageNumber);
+                    page.Collection = GetDataFromCollection(page.PageNumber);
                     page.ResultsOnPage = page.Collection.Count();
                     page.FirstResult = toSkip + 1;
 
@@ -218,6 +238,18 @@
             //}
 
             this._pages = pagesList;
+        }
+
+        private IEnumerable<T> GetDataFromCollection(int pageNumber)
+        {
+            if (pageNumber < 0 || pageNumber > this.PagesCount)
+            {
+                return new T[] { };
+            }
+
+            int offset = (pageNumber - 1) * this.PageSize;
+
+            return this._collection.Skip(offset).Take(this.PageSize);
         }
         #endregion
     }
