@@ -16,11 +16,18 @@
     {
         #region Testing String Values
 
+        /// <summary>
+        /// Check whether the string is an exact match to a provided RegEx
+        /// </summary>
+        /// <param name="RegularExpression">Expression to test against</param>
+        /// <param name="StringToTest">Data to test</param>
+        /// <param name="CaseSensitive">Does casing matter?</param>
+        /// <returns></returns>
         public static bool RegExMatchesExactly(string RegularExpression, string StringToTest, bool CaseSensitive = false)
         {
             bool bolResult;
-
             Match match;
+
             if (CaseSensitive)
             { match = Regex.Match(StringToTest, RegularExpression); }
             else
@@ -34,106 +41,7 @@
 
             return bolResult;
         }
-
-        public static bool EmailAddressIsValid(string EmailToTest)
-        {
-            bool Result;
-            Regex rgx = new Regex(@"([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})");
-
-            Result = rgx.IsMatch(EmailToTest) ? true : false;
-
-            return Result;
-        }
-
-        /// <summary>
-        /// Tests whether a string contains any of the separate values specified in  a delimited string list
-        /// </summary>
-        /// <param name="StringToTest">The string which might contain one or more of the various values</param>
-        /// <param name="DelimitedListOfTestValues">All the values to test</param>
-        /// <param name="DelimChar">Character used as the delimiter</param>
-        /// <returns>TRUE if any of the values appears in the string. FALSE if NONE of the values appear in the string</returns>
-        public static bool StringContainsValueFromList(string StringToTest, string DelimitedListOfTestValues, char DelimChar, bool CaseSensitive = false)
-        {
-            bool ValueIsInString = false;
-            int TotalMatches = 0;
-
-            string StringToTestFin = "";
-            string DelimitedListOfTestValuesFin = "";
-
-            if (!CaseSensitive)
-            {
-                StringToTestFin = StringToTest.ToLower();
-                DelimitedListOfTestValuesFin = DelimitedListOfTestValues.ToLower();
-            }
-            else
-            {
-                StringToTestFin = StringToTest;
-                DelimitedListOfTestValuesFin = DelimitedListOfTestValues;
-            }
-
-            List<string> ValuesList = DelimitedListOfTestValuesFin.Split(DelimChar).ToList();
-
-            for (int i = 0; i < ValuesList.Count; i++)
-            {
-                string ThisValue = ValuesList[i].ToString();
-
-                if (StringToTestFin.Contains(ThisValue))
-                {
-                    TotalMatches++;
-                }
-            }
-
-            if (TotalMatches > 0)
-            { ValueIsInString = true; }
-
-            return ValueIsInString;
-
-        }
-
-        public static bool UrlsAreOnSameDomain(string Url1, string Url2, string RelativeUrlAssumedDomain)
-        {
-            if (Url1.StartsWith("/") | Url1.StartsWith("~"))
-            {
-                Url1 = RelativeUrlAssumedDomain + Url1;
-            }
-
-            if (Url2.StartsWith("/") | Url2.StartsWith("~"))
-            {
-                Url2 = RelativeUrlAssumedDomain + Url2;
-            }
-
-            Uri Uri1 = new Uri(Url1);
-            Uri Uri2 = new Uri(Url2);
-
-            // There are overlaods for the constructor too
-            //Uri uri3 = new Uri(url3, UriKind.Absolute);
-
-            if (Uri1.Host == Uri2.Host)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public static bool IsNumeric(this string StringToTest)
-        {
-            try
-            {
-                decimal TestDec = Decimal.Parse(StringToTest);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                //TODO: Update using new code pattern:
-                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-                //var msg = string.Format("");
-                //Info.LogException("Extensions : String.IsNumeric", ex);
-                return false;
-            }
-        }
+        
 
         /// <summary>
         /// Tests whether a string contains any of the separate values specified in  a delimited string list
@@ -180,39 +88,227 @@
 
         }
 
-        public static bool IsValidDate(this string DateStringToTest, string DateFormat)
+        /// <summary>
+        /// Tests whether two provided Url strings are on the same domain (host). 
+        /// </summary>
+        /// <param name="Url1"></param>
+        /// <param name="Url2"></param>
+        /// <param name="RelativeUrlAssumedDomain">Provide the "assumed" domain for any relative urls.</param>
+        /// <returns></returns>
+        public static bool UrlsAreOnSameDomain(string Url1, string Url2, string RelativeUrlAssumedDomain)
         {
-            bool ValidDate = false;
+            if (Url1.StartsWith("/") | Url1.StartsWith("~"))
+            {
+                Url1 = RelativeUrlAssumedDomain + Url1;
+            }
+
+            if (Url2.StartsWith("/") | Url2.StartsWith("~"))
+            {
+                Url2 = RelativeUrlAssumedDomain + Url2;
+            }
+
+            Uri Uri1 = new Uri(Url1);
+            Uri Uri2 = new Uri(Url2);
+
+            // There are overloads for the constructor too
+            //Uri uri3 = new Uri(url3, UriKind.Absolute);
+
+            if (Uri1.Host == Uri2.Host)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
+        /// <summary>
+        /// Can the provided string be converted to a decimal value?
+        /// </summary>
+        /// <param name="StringToTest"></param>
+        /// <returns></returns>
+        public static bool IsNumeric(this string StringToTest)
+        {
             try
             {
-                var DateTest = DateTime.ParseExact(DateStringToTest, DateFormat, null);
+                decimal testDec = Decimal.Parse(StringToTest);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
 
-                if (DateTest != null)
+
+        /// <summary>
+        /// Test whether a string can be converted to a real date
+        /// </summary>
+        /// <param name="DateStringToTest"></param>
+        /// <param name="DateFormat"></param>
+        /// <returns></returns>
+        public static bool IsValidDate(this string DateStringToTest, string DateFormat)
+        {
+            bool isValid = false;
+            try
+            {
+                var dateTest = DateTime.ParseExact(DateStringToTest, DateFormat, null);
+
+                if (dateTest != null)
                 {
-                    ValidDate = true;
+                    isValid = true;
                 }
-
             }
             catch (Exception exNonValidDate)
             {
-                //TODO: Update using new code pattern:
-                //var functionName = string.Format("{0}.GetMySQLDataSet", ThisClassName);
-                //var msg = string.Format("");
-                //Info.LogException("Functions.StringIsValidDate", exNonValidDate, "[DateStringToTest=" + DateStringToTest + "] [DateFormat=" + DateFormat + "] FALSE value returned. No action necessary");
-                ValidDate = false;
+                isValid = false;
             }
 
-            return ValidDate;
+            return isValid;
         }
 
+
+        /// <summary>
+        /// Is the provided string a properly formatted email address?
+        /// </summary>
+        /// <param name="EmailToTest"></param>
+        /// <returns></returns>
         public static bool IsValidEmailAddress(this string EmailToTest)
         {
-            bool Result;
+            bool result;
             Regex rgx = new Regex(@"([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})");
 
-            Result = rgx.IsMatch(EmailToTest) ? true : false;
+            result = rgx.IsMatch(EmailToTest) ? true : false;
 
-            return Result;
+            return result;
+        }
+
+        /// <summary>
+        /// Test whether a string can be rendered successfully in an HTML document
+        /// </summary>
+        /// <param name="TextToTest">HTML string to test</param>
+        /// <param name="ValidationMsg">Returns a message about any errors</param>
+        /// <param name="ErrorsList">Returns a list of errors</param>
+        /// <returns>TRUE if valid, FALSE if not</returns>
+        public static bool IsValidHtml(this string TextToTest, out string ValidationMsg, out IEnumerable<HtmlParseError> ErrorsList)
+        {
+            if (!string.IsNullOrWhiteSpace(TextToTest))
+            {
+                //Validate HTML
+                HtmlDocument doc = new HtmlDocument();
+
+                doc.LoadHtml(TextToTest);
+
+                if (doc.ParseErrors.Any())
+                {
+                    //Invalid HTML
+                    ValidationMsg = "Invalid HTML. Errors:" + string.Join("; ", doc.ParseErrors);
+                    ErrorsList = doc.ParseErrors;
+                    return false;
+                }
+                else
+                {
+                    ValidationMsg = "Valid HTML";
+                    ErrorsList = new List<HtmlParseError>();
+                    return true;
+                }
+            }
+            else
+            {
+                ValidationMsg = "String is blank.";
+                ErrorsList = new List<HtmlParseError>();
+                return true;
+            }
+        }
+
+
+        /// <summary>
+        /// Test whether a string can be rendered successfully in an HTML document
+        /// </summary>
+        /// <param name="TextToTest">HTML string to test</param>
+        /// <param name="ValidationMsg">Returns a message about any errors</param>
+        /// <returns>TRUE if valid, FALSE if not</returns>
+        public static bool IsValidHtml(this string TextToTest, out string ValidationMsg)
+        {
+            if (!string.IsNullOrWhiteSpace(TextToTest))
+            {
+                //Validate HTML
+                HtmlDocument doc = new HtmlDocument();
+
+                doc.LoadHtml(TextToTest);
+
+                if (doc.ParseErrors.Any())
+                {
+                    //Invalid HTML
+                    ValidationMsg = "Invalid HTML. Errors:" + string.Join("; ", doc.ParseErrors);
+                    return false;
+                }
+                else
+                {
+                    ValidationMsg = "Valid HTML";
+                    return true;
+                }
+            }
+            else
+            {
+                ValidationMsg = "String is blank.";
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Test whether a string can be rendered successfully in an HTML document
+        /// </summary>
+        /// <param name="TextToTest">HTML string to test</param>
+        /// <param name="ErrorsList">Returns a list of errors</param>
+        /// <returns>TRUE if valid, FALSE if not</returns>
+        public static bool IsValidHtml(this string TextToTest, out IEnumerable<HtmlParseError> ErrorsList)
+        {
+            if (!string.IsNullOrWhiteSpace(TextToTest))
+            {
+                //Validate HTML
+                HtmlDocument doc = new HtmlDocument();
+
+                doc.LoadHtml(TextToTest);
+
+                if (doc.ParseErrors.Any())
+                {
+                    //Invalid HTML
+                    ErrorsList = doc.ParseErrors;
+                    return false;
+                }
+                else
+                {
+                    ErrorsList = new List<HtmlParseError>();
+                    return true;
+                }
+            }
+            else
+            {
+                ErrorsList = new List<HtmlParseError>();
+                return true;
+            }
+        }
+
+
+       [Obsolete("Use identical string extension function 'ContainsValueFromList()'")]       
+       public static bool StringContainsValueFromList(string StringToTest, string DelimitedListOfTestValues, char DelimChar, bool CaseSensitive = false)
+        {
+            return StringToTest.ContainsValueFromList(DelimitedListOfTestValues, DelimChar, CaseSensitive);
+
+        }
+
+        [Obsolete("Use identical string extension function 'IsValidEmailAddress()'")]
+        public static bool EmailAddressIsValid(string EmailToTest)
+        {
+            //bool Result;
+            //Regex rgx = new Regex(@"([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})");
+
+            //Result = rgx.IsMatch(EmailToTest) ? true : false;
+
+            return EmailToTest.IsValidEmailAddress();
         }
 
         #endregion
@@ -593,31 +689,15 @@
         /// <returns></returns>
         public static string RemoveAllParagraphTags(this string Html, bool RetainBreaks)
         {
-            var result = RemoveAllParagraphTags(new HtmlString(Html), RetainBreaks);
+            var result = new HtmlString(Html).RemoveAllParagraphTags(RetainBreaks);
             return result.ToString();
         }
 
         /// <summary>
-        /// Remove all &lt;p&gt; tags
+        /// Removes surrounding &lt;p&gt; tags
         /// </summary>
-        /// <param name="Html"></param>
-        /// <param name="RetainBreaks">Replaces the paragraph tag with two &lt;br&gt; tags</param>
+        /// <param name="HtmlToFix"></param>
         /// <returns></returns>
-        public static IHtmlString RemoveAllParagraphTags(this IHtmlString Html, bool RetainBreaks)
-        {
-            var result = Html.ToString();
-
-            if (RetainBreaks)
-            {
-                result = result.Replace("\r\n<p>", "<br/><br/>");
-                result = result.Replace("</p><p>", "<br/><br/>");
-            }
-            result = result.Replace("<p>", "");
-            result = result.Replace("</p>", " ");
-
-            return new HtmlString(result);
-        }
-
         public static string RemoveOuterParagrahTags(this string HtmlToFix)
         {
             HtmlDocument doc = new HtmlDocument();
@@ -627,28 +707,8 @@
             return result;
         }
 
-        public static IHtmlString RemoveOuterParagrahTags(this IHtmlString HtmlToFix)
-        {
-            string result = RemoveOuterParagrahTags(HtmlToFix.ToString());
-            return new HtmlString(result);
-        }
-
         /// <summary>
-        /// Strips out &lt;P&gt; and &lt;/P&gt; tags if they were used as a wrapper
-        /// for other HTML content.
-        /// </summary>
-        /// <param name="Text">The HTML text.</param>
-        /// <param name="ConvertEmptyParagraphsToBreaks"></param>
-        public static IHtmlString RemoveParagraphWrapperTags(this IHtmlString Text, bool ConvertEmptyParagraphsToBreaks = false)
-        {
-            var str = Text.ToString();
-            var fixedText = str.RemoveParagraphWrapperTags(ConvertEmptyParagraphsToBreaks);
-            return new HtmlString(fixedText);
-        }
-
-
-        /// <summary>
-        /// Strips out &lt;P&gt; and &lt;/P&gt; tags if they were used as a wrapper
+        /// Strips out &lt;p&gt; and &lt;/p&gt; tags if they were used as a wrapper
         /// for other HTML content.
         /// </summary>
         /// <param name="Text">The HTML text.</param>
@@ -692,35 +752,6 @@
             return trimmedText.Substring(3, trimmedText.Length - 7);
         }
 
-        public static IHtmlString ReplaceLineBreaksForWeb(this string StringToFix)
-        {
-            return new HtmlString(StringToFix.Replace("\r\n", "<br />").Replace("\n", "<br />"));
-        }
-
-        [Obsolete("Use 'RemoveAllParagraphTags()")]
-        public static string RemoveParagraphTags(this string Html, bool RetainBreaks)
-        {
-            return Html.RemoveAllParagraphTags(RetainBreaks);
-        }
-
-        [Obsolete("Use 'RemoveAllParagraphTags()")]
-        public static IHtmlString RemoveParagraphTags(this IHtmlString Html, bool RetainBreaks)
-        {
-            return Html.RemoveAllParagraphTags(RetainBreaks);
-        }
-
-        /// <summary>
-        /// Umbraco 7 Version
-        /// </summary>
-        /// <param name="Text"></param>
-        /// <returns></returns>
-        public static IHtmlString RemoveFirstParagraphTag(this IHtmlString Text)
-        {
-            var str = Text.ToHtmlString();
-            var fix = RemoveFirstParagraphTag(str);
-            return new HtmlString(fix);
-        }
-
         /// <summary>
         /// Umbraco 7 Version
         /// </summary>
@@ -741,7 +772,15 @@
             return Text;
         }
 
-
+        /// <summary>
+        /// Removes all Tags from string
+        /// </summary>
+        /// <param name="Input">Original string</param>
+        /// <returns></returns>
+        public static string StripHtml(this string Input)
+        {
+            return Regex.Replace(Input, "<.*?>", String.Empty);
+        }
 
         /// <summary>
         /// Replaces double spaces with single spaces
@@ -817,6 +856,13 @@
         public static string UrlDecode(this string EncodedString)
         {
             return System.Web.HttpUtility.UrlDecode(EncodedString);
+        }
+
+
+        [Obsolete("Use 'RemoveAllParagraphTags()")]
+        public static string RemoveParagraphTags(this string Html, bool RetainBreaks)
+        {
+            return Html.RemoveAllParagraphTags(RetainBreaks);
         }
 
         #endregion
@@ -1164,6 +1210,5 @@
         }
 
         #endregion
-
     }
 }
