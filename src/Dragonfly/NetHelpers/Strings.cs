@@ -321,14 +321,20 @@
 
             NewString = NewString.Replace("'", "");
             NewString = NewString.Replace("\"", WordSeparator);
-            NewString = NewString.Replace("/", WordSeparator);
+            NewString = NewString.Replace("\\", WordSeparator);
+            NewString = NewString.Replace("|", WordSeparator);
             NewString = NewString.Replace("®", "");
             NewString = NewString.Replace("%", "");
             NewString = NewString.Replace(".", WordSeparator);
             NewString = NewString.Replace(";", WordSeparator);
             NewString = NewString.Replace(":", WordSeparator);
             NewString = NewString.Replace("#", "");
-            NewString = NewString.Replace("+", "");
+            NewString = NewString.Replace("+", WordSeparator);
+            NewString = NewString.Replace("=", WordSeparator);
+            NewString = NewString.Replace("[", "");
+            NewString = NewString.Replace("]", "");
+            NewString = NewString.Replace("{", "");
+            NewString = NewString.Replace("}", "");
             NewString = NewString.Replace("*", "");
             NewString = NewString.Replace("&", "and");
             NewString = NewString.Replace("?", "");

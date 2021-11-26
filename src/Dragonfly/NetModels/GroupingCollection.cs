@@ -27,6 +27,16 @@ namespace Dragonfly.NetModels
         public IEnumerable<Group<T>> Groups { get; set; }
 
         /// <summary>
+        /// List of Keys to retrieve groups
+        /// </summary>
+        public List<string> GroupKeys { get; set; }
+        
+        /// <summary>
+        /// Multiple Properties were used for Grouping
+        /// </summary>
+        public bool IsGroupedByMultiple{ get; set; }
+
+        /// <summary>
         /// Gets groups count
         /// </summary>
         public int GroupsCount
@@ -37,11 +47,6 @@ namespace Dragonfly.NetModels
             }
         }
 
-        //public IEnumerable<Group<T>> Groups
-        //{
-        //    get { return this.GroupedCollection; }
-        //}
-
         #endregion
 
         #region ctor
@@ -51,6 +56,7 @@ namespace Dragonfly.NetModels
         /// </summary>
         public GroupingCollection()
         {
+            this.GroupKeys = new List<string>();
         }
 
         /// <summary>
@@ -58,6 +64,8 @@ namespace Dragonfly.NetModels
         /// </summary>
         public GroupingCollection(IEnumerable<T> InitialCollection)
         {
+            this.GroupKeys = new List<string>();
+
             if (InitialCollection == null)
             {
                 throw new ArgumentNullException("InitialCollection");
@@ -65,6 +73,19 @@ namespace Dragonfly.NetModels
 
             this.InitialCollection = InitialCollection; //.ToArray();
         }
+
+        ///// <summary>
+        ///// Creates initial collection with Initial Grouping Predicate
+        ///// </summary>
+        //public GroupingCollection(IEnumerable<T> InitialCollection,Func<T, TKey> GroupingProperty)
+        //{
+        //    if (InitialCollection == null)
+        //    {
+        //        throw new ArgumentNullException("InitialCollection");
+        //    }
+
+        //    this.InitialCollection = InitialCollection; //.ToArray();
+        //}
 
         #endregion
 
@@ -75,25 +96,38 @@ namespace Dragonfly.NetModels
         /// </summary>
         /// <typeparam name="TKey"></typeparam>
         /// <param name="GroupingProperty"></param>
+        /// <example>
+        /// x =>  x.Property
+        /// OR
+        /// x => new { x.Property1, x.Property2 }
+        /// </example>
         public void GroupItems<TKey>(Func<T, TKey> GroupingProperty)
         {
             var query = (from item in this.InitialCollection select item).GroupBy(GroupingProperty);
 
             var groups = new List<Group<T>>();
-
+            var index = 0;
             foreach (var nameGroup in query)
             {
                 var thisGroup = new Group<T>();
+                thisGroup.GroupOriginalSortOrder = index;
+                thisGroup.GroupName = new Dictionary<string, object>();
+
+                this.GroupKeys = new List<string>();
+               
                 if (nameGroup.Key.ToString().Contains("{"))
                 {
                     //multiple keys
+                    this.IsGroupedByMultiple = true;
                     thisGroup.GroupName = nameGroup.Key.ToDictionary();
+                    this.GroupKeys = thisGroup.GroupName.Keys.ToList();
                 }
                 else
                 {
                     //single key
-                    thisGroup.GroupName = new Dictionary<string, object>();
+                    this.IsGroupedByMultiple = false;
                     thisGroup.GroupName.Add("Key", nameGroup.Key);
+                    this.GroupKeys.Add("Key");
                 }
 
                 var items = new List<T>();
@@ -106,6 +140,7 @@ namespace Dragonfly.NetModels
                 thisGroup.Collection = items;
 
                 groups.Add(thisGroup);
+                index++;
             }
 
             Groups = groups;
@@ -137,11 +172,18 @@ namespace Dragonfly.NetModels
         #region IEnumerable<T> Members
 
         /// <summary>
-        /// Returns an enumerator that iterates through initial collection
+        /// Returns an enumerator that iterates through groups collection
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            return this.InitialCollection.GetEnumerator();
+            if (this.Groups != null)
+            {
+                return (IEnumerator<T>)this.Groups.GetEnumerator();
+            }
+            else
+            {
+                return this.InitialCollection.GetEnumerator();
+            }
         }
 
         #endregion
@@ -166,9 +208,12 @@ namespace Dragonfly.NetModels
     /// <typeparam name="T">Type of elements in collection</typeparam>
     public class Group<T>
     {
-        //public int GroupIndex { get; set; }
+        public int GroupOriginalSortOrder { get; set; }
 
         //public string GroupKey { get; set; }
+        //public IEnumerable<string> GroupKeys { get; set; }
+
+        //public bool IsGroupedByMultiple{ get; set; }
 
         public IDictionary<string, object> GroupName { get; set; }
 
