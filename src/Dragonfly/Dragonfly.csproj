@@ -10,15 +10,19 @@
     <Product>Dragonfly</Product>
     <Description>A collection of .Net Helpers &amp; Models</Description>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/hfloyd/Dragonfly.Net</PackageProjectUrl>
+    <PackageProjectUrl>https://dragonflylibraries.com/aspnet-packages/net-helpers-models/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/hfloyd/Dragonfly.Net</RepositoryUrl>
     <PackageId>Dragonfly.Net</PackageId>
     <AssemblyName>Dragonfly.Net</AssemblyName>
-    <Version>1.31.0</Version>
-    <AssemblyVersion>1.31.0</AssemblyVersion>
-    <FileVersion>1.31.0</FileVersion>
-    <PackageReleaseNotes>Updates to MakeCodeSafe()</PackageReleaseNotes>
+    <Version>1.32.0</Version>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <PackageReleaseNotes>New Urls.GetSafeQueryStringValue&lt;T&gt;() function</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageIcon>Dragonfly-NetHelpers-128.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>Dragonfly .Net Helpers</Title>
+    <IncludeSymbols>True</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,9 +47,17 @@
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Dragonfly-NetHelpers-128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\..\LICENSE.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
 

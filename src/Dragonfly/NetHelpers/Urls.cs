@@ -7,7 +7,7 @@
     using System.Net;
 
     /// <summary>
-    /// Functions to assit with Url-related tasks - reading, editing/building, query strings, basic calling
+    /// Functions to assist with Url-related tasks - reading, editing/building, query strings, basic calling
     /// </summary>
     public static class Urls
     {
@@ -77,38 +77,60 @@
 
         #region Get QueryString Values
 
-        ///// <summary>
-        ///// Returns the Querystring value cast to T, or the Default, if missing
-        ///// </summary>
-        ///// <param name="Request">HttpRequest (Just use 'Request')</param>
-        ///// <param name="QueryStringKey">Key name</param>
-        ///// <param name="DefaultIfMissing">A default value to return in case the Querystring value is missing</param>
-        ///// <returns></returns>
-        //public static T GetSafeQueryStringValue<T>(System.Web.HttpRequestBase Request, string QueryStringKey, T DefaultIfMissing)
-        //{
-        //    var qsVal = Request.QueryString[QueryStringKey];
+        /// <summary>
+        /// Returns the Querystring value cast to T, or the Default, if missing
+        /// </summary>
+        /// <param name="Request">HttpRequest (Just use 'Request')</param>
+        /// <param name="QueryStringKey">Key name</param>
+        /// <param name="DefaultIfMissing">A default value to return in case the Querystring value is missing</param>
+        /// <param name="ReturnDefaultOnConversionFailure">If there is a value, but converting it to the desired time fails, should the default be returned?
+        /// (FALSE will throw an Exception on failure)</param>
+        /// <returns></returns>
+        public static T GetSafeQueryStringValue<T>(System.Web.HttpRequestBase Request, string QueryStringKey, T DefaultIfMissing = default, bool ReturnDefaultOnConversionFailure = false)
+        {
+            var qsVal = Request.QueryString[QueryStringKey];
+            
+            if (string.IsNullOrEmpty(qsVal))
+            {
+                return DefaultIfMissing;
+            }
+            else
+            {
+                try
+                {
+                    return (T)Convert.ChangeType(qsVal, typeof(T));
+                }
+                catch (Exception e1)
+                {
+                    try
+                    {
+                        Type returnType = typeof(T);
+                        object convertedObj = (object)qsVal;
 
-        //    if (!string.IsNullOrEmpty(qsVal))
-        //    {
-        //        //try conversion
-        //        try
-        //        {
-        //            var qsObj = (object)qsVal;
-        //            return (T)qsObj;
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            //try some specific conversions
-        //            if(typeof(T) == typeint)
-        //            throw;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        //No QS val matching Key
-        //        return DefaultIfMissing;
-        //    }
-        //}
+                        //if (returnType == typeof(int))
+                        //{
+                        //    convertedObj = (object)Convert.ToInt32(qsVal);
+                        //}
+
+                        return (T)convertedObj;
+                    }
+                    catch (Exception e2)
+                    {
+                        if (ReturnDefaultOnConversionFailure)
+                        {
+                            return DefaultIfMissing;
+                        }
+                        else
+                        {
+                            throw;
+                        }
+
+                    }
+                }
+            }
+
+
+        }
 
 
 
@@ -119,6 +141,7 @@
         /// <param name="QueryStringKey">Key name</param>
         /// <param name="DefaultIfMissing">Value to return if missing/empty</param>
         /// <returns></returns>
+        [Obsolete("Consider using 'GetSafeQueryStringValue<T>()' function")]
         public static string GetSafeQueryString(System.Web.HttpRequestBase Request, string QueryStringKey, string DefaultIfMissing = "")
         {
             var returnVal = DefaultIfMissing;
@@ -140,6 +163,7 @@
         /// <param name="QueryStringKey">Key name</param>
         /// <param name="DefaultIfMissing">Value to return if missing/empty</param>
         /// <returns></returns>
+        [Obsolete("Consider using 'GetSafeQueryStringValue<T>()' function")]
         public static bool GetSafeQueryBool(System.Web.HttpRequestBase Request, string QueryStringKey, bool DefaultIfMissing = false)
         {
             var returnVal = DefaultIfMissing;
@@ -164,6 +188,7 @@
         /// <param name="QueryStringKey">Key name</param>
         /// <param name="DefaultIfMissing">Value to return if missing/empty</param>
         /// <returns></returns>
+        [Obsolete("Consider using 'GetSafeQueryStringValue<T>()' function")]
         public static int GetSafeQueryInt(System.Web.HttpRequestBase Request, string QueryStringKey, int DefaultIfMissing = 0)
         {
             var returnVal = DefaultIfMissing;
@@ -321,7 +346,7 @@
         {
             var uri = OriginalUri;
 
-            var baseUrl =$"{uri.Scheme}://{uri.Host}{uri.LocalPath}" ;
+            var baseUrl = $"{uri.Scheme}://{uri.Host}{uri.LocalPath}";
             //var basePath = uri.AbsolutePath;
 
             //Anchor Tag
